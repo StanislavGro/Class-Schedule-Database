@@ -18,6 +18,7 @@ private:
 
 public:
 
+	schedule();
 	schedule(int, int, int, string, string, string);
 	schedule(const schedule &);
 

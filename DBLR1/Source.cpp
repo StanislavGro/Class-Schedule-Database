@@ -12,52 +12,17 @@ int main() {
 
     setlocale(LC_ALL, "Rus");
 
-    vector<schedule> vector;
+    DataMapper dataMapper;
+    dataMapper.insert(*(new schedule(2, 315, 5, "AVT-819", "14:00-15:30", "Monday")));
 
-    schedule sc(1, 814, 2, "АВТ-815", "14:00-15:30", "Monday");
-
-    vector.push_back(schedule(1, 814, 2, "АВТ-815", "14:00-15:30", "Monday"));
-    vector.push_back(schedule(2, 318, 8, "АВТ-819", "8:30-10:00", "Tuesday"));
-    vector.push_back(schedule(3, 814, 2, "АВТ-815", "14:00-15:30", "Monday"));
-
-    for (int i = 0; i < vector.size(); i++)
-        vector[i].print();
-
+    /*vector<schedule> vector;
     
-    cin >> vector[0];
-    cout << vector[0];
+    schedule sced;
 
-    /*
-    SQLHENV henv; // Дескриптор окружения
-    SQLHDBC hdbc; // Дескриптор соединения
-    SQLHSTMT hstmt; // Дескриптор оператора
-    SQLRETURN retcode; // Код возврата
+    cin >> sced;
 
-    retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
-    if (retcode < 0)
-        return -1;
-    retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, SQL_NTS);
-    if (retcode < 0)
-        return -2;
-    retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-    if (retcode < 0)
-        return -3;
+    vector.push_back(sced);
+    cout << vector[vector.size()-1];*/
 
-    retcode = SQLConnect(hdbc, (SQLWCHAR*)L"Mydbase", SQL_NTS,
-        (SQLWCHAR*)L"stanis", SQL_NTS, (SQLWCHAR*)L"130263", SQL_NTS);
-
-    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-        retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-        if (retcode < 0)
-            return -6;
-
-        return 1;
-    }
-    if (retcode < 0)
-        return -4;
-
-    return -5;
-
-    */
 
 }
