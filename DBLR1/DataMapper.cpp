@@ -1,8 +1,16 @@
 #include "DataMapper.h"
+#include<iostream>
+#include<vector>
 
-DataMapper::DataMapper()
-{
-    cout << connectToDB() << endl;
+using namespace::std;
+
+DataMapper::DataMapper() { 
+
+    if (connectToDB() == 1)
+        creatingTables();
+    else
+        cout << "Какая-то неизвестная ошибка!" << endl;
+
 }
 
 int DataMapper::connectToDB() 
@@ -46,6 +54,89 @@ bool DataMapper::insert(schedule sched)
 
     retcode = SQLExecute(hstmt);
     return true;
+}
+
+void DataMapper::creatingTables()
+{
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists schedule ("
+        "id serial primary key,"
+        "auditory int,"
+        "groupp varchar(15),"
+        "week int,"
+        "day varchar(10),"
+        "time varchar(15),"
+        "id_Auditory int,"
+        "id_Group int,"
+        "id_Week int,"
+        "id_Day int,"
+        "id_Time int"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists auditory_table("
+        "id serial primary key,"
+        "auditory int"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists groupp_table("
+        "id serial primary key,"
+        "groupp varchar(15)"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists week_table("
+        "id serial primary key,"
+        "week int"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists day_table("
+        "id serial primary key,"
+        "day varchar(10)"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists time_table("
+        "id serial primary key,"
+        "time varchar(15)"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists time_table("
+        "id serial primary key,"
+        "time varchar(15)"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"alter table schedule add constraint sc_au_for_key foreign key(id_Auditory)" 
+        "references auditory_table(id);", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
 }
 
 int DataMapper::disconnectFromDB() 

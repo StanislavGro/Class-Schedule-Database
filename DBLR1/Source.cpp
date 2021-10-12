@@ -13,7 +13,8 @@ int main() {
     setlocale(LC_ALL, "Rus");
 
     DataMapper dataMapper;
-    dataMapper.insert(*(new schedule(2, 315, 5, "AVT-819", "14:00-15:30", "Monday")));
+
+    //dataMapper.insert(*(new schedule(2, 315, 5, "AVT-819", "14:00-15:30", "Monday")));
 
     /*vector<schedule> vector;
     

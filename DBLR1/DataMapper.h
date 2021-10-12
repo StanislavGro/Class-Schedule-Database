@@ -28,6 +28,8 @@ public:
 
     bool insert(schedule);
 
+    void creatingTables();
+
     ~DataMapper();
 
 };
