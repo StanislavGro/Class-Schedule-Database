@@ -29,6 +29,9 @@ public:
     bool insert(schedule);
 
     void creatingTables();
+    void download();
+
+    vector<schedule> getSchedule();
 
     ~DataMapper();
 

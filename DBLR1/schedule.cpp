@@ -6,9 +6,12 @@ using namespace::std;
 schedule::schedule(): 
 	id(-1), classroomNumber(-1), weekNumber(-1), groupName(""), timePeriod(""), dayOfWeek("") {}
 
-
 schedule::schedule(int ID, int clNum, int weekNum, string grName, string timePer, string dayOW) :
 	id(ID), classroomNumber(clNum), weekNumber(weekNum), groupName(grName), timePeriod(timePer), dayOfWeek(dayOW) {}
+
+schedule::schedule(int clNum, int weekNum, string grName, string timePer, string dayOW) :
+	schedule::schedule(-1, clNum, weekNum, grName, timePer, dayOW) {}
+
 
 schedule::schedule(const schedule& sc) :
 	id(sc.id), classroomNumber(sc.classroomNumber), weekNumber(sc.weekNumber), 

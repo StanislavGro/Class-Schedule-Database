@@ -20,6 +20,7 @@ public:
 
 	schedule();
 	schedule(int, int, int, string, string, string);
+	schedule(int, int, string, string, string);
 	schedule(const schedule &);
 
 	void setID(int);

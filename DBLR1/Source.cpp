@@ -14,7 +14,9 @@ int main() {
 
     DataMapper dataMapper;
 
-    //dataMapper.insert(*(new schedule(2, 315, 5, "AVT-819", "14:00-15:30", "Monday")));
+    dataMapper.insert(*(new schedule(315, 5, "AVT-819", "14:00-15:30", "Monday")));
+
+    cout << dataMapper.getSchedule()[0];
 
     /*vector<schedule> vector;
     
