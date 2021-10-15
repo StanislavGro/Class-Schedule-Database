@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <odbcinst.h>
 #include <sqlext.h>
+#include<stdarg.h>
 #include"schedule.h"
 
 using namespace::std;
@@ -22,18 +23,25 @@ private:
 public:
 
     DataMapper();
+    ~DataMapper();
+
+    void creatingTables();
 
     int connectToDB();
     int disconnectFromDB();
-
-    bool insert(schedule);
-
-    void creatingTables();
-    void download();
-
+    
     vector<schedule> getSchedule();
-
-    ~DataMapper();
+    
+    void printAll();
+    
+    bool insert(schedule);
+    bool edit(int);
+    bool edit(schedule);
+    bool remove(int);
+    bool remove(schedule);
+    
+    void find(string ,...); //поиск по заданным часам в течении семестра (выход: аудитория, неделя, день, часы)
+    void find(int, int); //поиск на заданное число часов в указанную неделю (выход: аудитория, неделя, день, часы)
 
 };
 

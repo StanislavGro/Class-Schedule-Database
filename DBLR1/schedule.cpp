@@ -4,18 +4,18 @@
 using namespace::std;
 
 schedule::schedule(): 
-	id(-1), classroomNumber(-1), weekNumber(-1), groupName(""), timePeriod(""), dayOfWeek("") {}
+	id(-1), weekNumber(-1), dayOfWeek(""), timePeriod(""), groupName(""), classroomNumber(-1)  {}
 
-schedule::schedule(int ID, int clNum, int weekNum, string grName, string timePer, string dayOW) :
-	id(ID), classroomNumber(clNum), weekNumber(weekNum), groupName(grName), timePeriod(timePer), dayOfWeek(dayOW) {}
+schedule::schedule(int ID, int weekNum, string dayOW, string timePer, string grName, int clNum) :
+	id(ID), weekNumber(weekNum), dayOfWeek(dayOW), timePeriod(timePer), groupName(grName), classroomNumber(clNum) {}
 
-schedule::schedule(int clNum, int weekNum, string grName, string timePer, string dayOW) :
-	schedule::schedule(-1, clNum, weekNum, grName, timePer, dayOW) {}
+schedule::schedule(int weekNum, string dayOW, string timePer, string grName, int clNum) :
+	schedule::schedule(-1, weekNum, dayOW, timePer, grName, clNum) {}
 
 
 schedule::schedule(const schedule& sc) :
-	id(sc.id), classroomNumber(sc.classroomNumber), weekNumber(sc.weekNumber), 
-	groupName(sc.groupName), timePeriod(sc.timePeriod), dayOfWeek(sc.dayOfWeek) {}
+	id(sc.id), weekNumber(sc.weekNumber), dayOfWeek(sc.dayOfWeek), timePeriod(sc.timePeriod),   
+	groupName(sc.groupName), classroomNumber(sc.classroomNumber) {}
 
 void schedule::setID(int ID) { this->id = ID; }
 
@@ -49,11 +49,11 @@ bool schedule::operator==(const schedule& sched)
 
 ostream& operator<<(ostream& os, schedule& shed)
 {
-	os << "Номер аудитории: " << shed.classroomNumber << endl;
 	os << "Номер недели: "	  << shed.weekNumber	  << endl;
 	os << "День недели: "	  << shed.dayOfWeek		  << endl;
-	os << "Название группы: " << shed.groupName		  << endl;
 	os << "Время: "			  << shed.timePeriod	  << endl;
+	os << "Название группы: " << shed.groupName		  << endl;
+	os << "Номер аудитории: " << shed.classroomNumber << endl;
 
 	os << endl;
 
@@ -64,22 +64,22 @@ istream& operator>>(istream& is, schedule& shed)
 {
 
 	is >> shed.id;
-	is >> shed.classroomNumber;
 	is >> shed.weekNumber;
-	is >> shed.groupName;
-	is >> shed.timePeriod;
 	is >> shed.dayOfWeek;
+	is >> shed.timePeriod;
+	is >> shed.groupName;
+	is >> shed.classroomNumber;
 
 	return is;
 }
 
 void schedule::print()
 {
-	cout << "Номер аудитории: " << this->classroomNumber <<endl;
 	cout << "Номер недели: "	<< this->weekNumber		 <<endl;
 	cout << "День недели: "		<< this->dayOfWeek		 <<endl;
-	cout << "Название группы: " << this->groupName		 <<endl;
 	cout << "Время: "			<< this->timePeriod		 <<endl;
+	cout << "Название группы: " << this->groupName		 <<endl;
+	cout << "Номер аудитории: " << this->classroomNumber <<endl;
 
 	cout << endl;
 }

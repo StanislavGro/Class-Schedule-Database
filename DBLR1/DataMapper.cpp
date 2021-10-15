@@ -46,11 +46,11 @@ bool DataMapper::insert(schedule sched)
 
     scheduleMapper.push_back(sched);
    
-    SQLINTEGER auditory = sched.getClassroomNumber();
-    SQLWCHAR group[20];
-    SQLWCHAR time[20];
-    SQLWCHAR day[20];
     SQLINTEGER week = sched.getWeekNumber();
+    SQLWCHAR day[20];
+    SQLWCHAR time[20];
+    SQLWCHAR group[20];
+    SQLINTEGER auditory = sched.getClassroomNumber();
 
     strcpy_s((char*)group, strlen(sched.getGroupName().c_str()) + 1, sched.getGroupName().c_str());
     strcpy_s((char*)time , strlen(sched.getTimePeriod().c_str()) + 1, sched.getTimePeriod().c_str());
@@ -92,13 +92,13 @@ bool DataMapper::insert(schedule sched)
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
 
 
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &auditory, 0, NULL);
-    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
-    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &week, 0, NULL);
-    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, day, 255, NULL);
-    retcode = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, time, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &week, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, day, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, time, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &auditory, 0, NULL);
 
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO schedule(auditory, groupp, week, day, time )"
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO schedule(week, day, time, groupp, auditory)"
                         "VALUES (?, ?, ?, ?, ?)", SQL_NTS);
     retcode = SQLExecute(hstmt);
 
@@ -111,11 +111,11 @@ void DataMapper::creatingTables()
     retcode = SQLPrepare(hstmt,
         (SQLWCHAR*)L"create table if not exists schedule ("
         "id serial primary key,"
-        "auditory int,"
-        "groupp varchar(20),"
         "week int,"
         "day varchar(20),"
-        "time varchar(20)"
+        "time varchar(20),"
+        "groupp varchar(20),"
+        "auditory int"
         "); ", SQL_NTS);
     retcode = SQLExecute(hstmt);
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
@@ -198,9 +198,6 @@ void DataMapper::creatingTables()
 
 }
 
-void DataMapper::download()
-{
-}
 
 vector<schedule> DataMapper::getSchedule()
 {
