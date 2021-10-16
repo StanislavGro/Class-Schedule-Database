@@ -35,10 +35,8 @@ public:
     void printAll();
     
     bool insert(schedule);
-    bool edit(int);
-    bool edit(schedule);
+    bool edit(int, schedule);
     bool remove(int);
-    bool remove(schedule);
     
     void find(string ,...); //поиск по заданным часам в течении семестра (выход: аудитория, неделя, день, часы)
     void find(int, int); //поиск на заданное число часов в указанную неделю (выход: аудитория, неделя, день, часы)

@@ -8,29 +8,29 @@
 
 using namespace::std;
 
-int main() {
-
-    setlocale(LC_ALL, "Rus");
-
-    DataMapper dataMapper;
-
-    dataMapper.insert(*(new schedule(7, "Friday", "12:00-13:30", "АВТ-815", 1)));
-
-    //cout << dataMapper.getSchedule()[0];
-
-
-	cout << "\t\t\t\t***Расписание занятий!***\n";
+void console() {
 
 	cout << "1. Добавить запись" << endl;
 	cout << "2. Удалить запись по номеру" << endl;
-	cout << "3. Удалить ввденную запись" << endl;
-	cout << "4. Редактировать запись по номеру" << endl;
-	cout << "5. Редактировать ввденную запись" << endl;
-	cout << "6. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
-	cout << "7. Поиск свободной аудитории на заданное число часов в указанную неделю" << endl;
-	cout << "8. Просмотр таблицы" << endl;
-	cout << "9. Очистка экрана" << endl;
-	cout << "10. Завершение сесии\n\n";
+	cout << "3. Редактировать запись по номеру" << endl;
+	cout << "4. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
+	cout << "5. Поиск свободной аудитории на заданное число часов в указанную неделю" << endl;
+	cout << "6. Просмотр таблицы" << endl;
+	cout << "7. Очистка экрана" << endl;
+	cout << "8. Завершение сесии\n\n";
+
+}
+
+int main() {
+
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+    DataMapper dataMapper;
+
+	cout << "\t\t\t\t***Расписание занятий!***\n";
+
+	console();
 
 	int s = 1, func;
 
@@ -43,68 +43,77 @@ int main() {
 
 		case 1: {
 
+			schedule sch;
 
+			system("cls");
+
+			cout << "  Введите неделю, день, время, группу и аудиторию через ENTER" << endl;
+
+			cin >> sch;
+
+			dataMapper.insert(sch);
+
+			system("cls");
+
+			console();
 
 			break;
 		}
 		case 2: {
 
+			int deleteNumber;
+
+			cout << "  Введите порядковый номер записи в расписании: ";
+			cin >> deleteNumber;
+
+			dataMapper.remove(deleteNumber);
+
+			break;
+
+		}
+		case 3: {
+
+			schedule sch;
+			int editNumber;
+
+			cout << "  Введите порядковый номер записи в расписании: ";
+			cin >> editNumber;
+
+			cout << "  Введите новые: неделю, день, время, группу и аудиторию через ENTER" << endl;
+			cin >> sch;
+
+			dataMapper.edit(editNumber, sch);
+
+			break;
+		}
+		case 4: {
+
 
 
 			break;
-		}case 3: {
 
-
-
-			break;
-		}case 4: {
-
-
-
-			break;
 		}
 		case 5: {
 
 
 
 			break;
-
 		}
 		case 6: {
 
-
+			dataMapper.printAll();
 
 			break;
 		}
 		case 7: {
 
+			system("cls");
 
+			console();
 
 			break;
 		}
 		case 8: {
-
-
-
-			break;
-		}
-		case 9: {
-			system("cls");
-
-			cout << "1. Добавить запись" << endl;
-			cout << "2. Удалить запись по номеру" << endl;
-			cout << "3. Удалить ввденную запись" << endl;
-			cout << "4. Редактировать запись по номеру" << endl;
-			cout << "5. Редактировать ввденную запись" << endl;
-			cout << "6. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
-			cout << "7. Поиск свободной аудитории на заданное число часов в указанную неделю" << endl;
-			cout << "8. Просмотр таблицы" << endl;
-			cout << "9. Очистка экрана" << endl;
-			cout << "10. Завершение сесии\n\n";
-
-			break;
-		}
-		case 10: {
 			s = 0;
 			break;
 		}
@@ -115,8 +124,6 @@ int main() {
 		}
 
 	}
-
-	system("pause");
 
 	return 0;
 }

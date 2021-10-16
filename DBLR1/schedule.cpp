@@ -63,7 +63,7 @@ ostream& operator<<(ostream& os, schedule& shed)
 istream& operator>>(istream& is, schedule& shed) 
 {
 
-	is >> shed.id;
+	//is >> shed.id;
 	is >> shed.weekNumber;
 	is >> shed.dayOfWeek;
 	is >> shed.timePeriod;
@@ -75,6 +75,7 @@ istream& operator>>(istream& is, schedule& shed)
 
 void schedule::print()
 {
+	cout << this->id << "." << endl;
 	cout << "Номер недели: "	<< this->weekNumber		 <<endl;
 	cout << "День недели: "		<< this->dayOfWeek		 <<endl;
 	cout << "Время: "			<< this->timePeriod		 <<endl;
