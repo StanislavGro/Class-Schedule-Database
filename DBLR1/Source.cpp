@@ -3,6 +3,7 @@
 #include <odbcinst.h>
 #include <sqlext.h>
 #include <vector>
+#include <string>
 #include "schedule.h"
 #include "DataMapper.h"
 
@@ -40,7 +41,6 @@ int main() {
 		cin >> func;
 
 		switch (func) {
-
 		case 1: {
 
 			schedule sch;
@@ -88,14 +88,39 @@ int main() {
 		}
 		case 4: {
 
+			string hours;
+			int audit;
 
+			cout << "  ¬ведите промежутки времени: ";
+
+			cin.get();
+			getline(cin, hours);
+
+			cout << "  ¬ведите номер аудитории: ";
+			cin >> audit;
+
+			dataMapper.find(audit, hours);
 
 			break;
 
 		}
 		case 5: {
 
+			string hours;
+			int number, audit;
 
+			cout << "  ¬ведите промежутки времени: ";
+
+			cin.get();
+			getline(cin, hours);
+
+			cout << "  ¬ведите номер недели: ";
+			cin >> number;
+
+			cout << "  ¬ведите номер аудитории: ";
+			cin >> audit;
+
+			dataMapper.find(audit, hours, number);
 
 			break;
 		}
