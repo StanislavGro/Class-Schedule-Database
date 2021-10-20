@@ -51,7 +51,12 @@ int main() {
 
 			cin >> sch;
 
-			dataMapper.insert(sch);
+			if (dataMapper.insert(sch))
+				cout << "  Вставка выполнена!" << endl;
+			else
+				cout << "  Произошла ошибка!" << endl;
+
+			system("pause");
 
 			system("cls");
 
@@ -66,7 +71,10 @@ int main() {
 			cout << "  Введите порядковый номер записи в расписании: ";
 			cin >> deleteNumber;
 
-			dataMapper.remove(deleteNumber);
+			if (dataMapper.remove(deleteNumber))
+				cout << "  Удаление выполнено!" << endl;
+			else
+				cout << "  Произошла ошибка!" << endl;
 
 			break;
 
@@ -82,7 +90,10 @@ int main() {
 			cout << "  Введите новые: неделю, день, время, группу и аудиторию через ENTER" << endl;
 			cin >> sch;
 
-			dataMapper.edit(editNumber, sch);
+			if (dataMapper.edit(editNumber, sch))
+				cout << "  Запись изменена!" << endl;
+			else
+				cout << "  Произашла ошибка!" << endl;
 
 			break;
 		}

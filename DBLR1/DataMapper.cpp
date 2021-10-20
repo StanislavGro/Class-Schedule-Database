@@ -111,12 +111,32 @@ bool DataMapper::insert(schedule sched)
 
 bool DataMapper::edit(int number, schedule sched)
 {
+
+    int id = 0;
+    vector<int> idVector;
+
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from schedule", SQL_NTS);
+    retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+
+    for (int i = 0; ; i++) {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Error" << endl;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            idVector.push_back(id);
+        else break;
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    SQLINTEGER editNumber = idVector[number - 1];
+    idVector.clear();
+    idVector.shrink_to_fit();
+
     SQLINTEGER auditory = sched.getClassroomNumber();
     SQLINTEGER week = sched.getWeekNumber();
     SQLWCHAR group[20];
     SQLWCHAR day[20];
     SQLWCHAR time[20];
-    SQLINTEGER editNumber = number;
 
 
     strcpy_s((char*)group, strlen(sched.getGroupName().c_str()) + 1, sched.getGroupName().c_str());
@@ -178,9 +198,27 @@ bool DataMapper::edit(int number, schedule sched)
 
 bool DataMapper::remove(int number)
 {
-    SQLINTEGER editNumber = number;
+    int id = 0;
+    vector<int> idVector;
 
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &editNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from schedule", SQL_NTS);
+    retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+
+    for (int i = 0; ; i++) {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Error" << endl;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            idVector.push_back(id);
+        else break;
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    SQLINTEGER removeNumber = idVector[number - 1];
+    idVector.clear();
+    idVector.shrink_to_fit();
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
 
     retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"delete from schedule where id = ?;", SQL_NTS);
     retcode = SQLExecute(hstmt);
@@ -263,7 +301,7 @@ void DataMapper::find(int audit, string str)
     int auditory = 0;
 
     //const char* charOutput = output.c_str();
-    wcout << output << endl;
+    //wcout << output << endl;
 
     retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
 
@@ -407,6 +445,7 @@ void DataMapper::find(int audit, string str, int number)
     int auditory = 0;
 
     //const char* charOutput = output.c_str();
+
     //wcout << output << endl;
 
     retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
@@ -674,105 +713,3 @@ DataMapper::~DataMapper()
     scheduleMapper.shrink_to_fit();
 
 }
-
-
-/*
-
-void DataMapper::find1(string str)
-{
-
-    SQLWCHAR hours[20];
-
-    strcpy_s((char*)hours, strlen(str.c_str()) + 1, str.c_str());
-
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, hours, 255, NULL);
-
-    int week = 0;
-    char day[20];
-    char time[20];
-    char group[20];
-    int auditory = 0;
-
-    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select week, day, time, groupp, auditory from schedule where time = ?", SQL_NTS);
-
-    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-
-        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &week, sizeof(week), NULL);
-        retcode = SQLBindCol(hstmt, 2, SQL_C_CHAR, day, 15, NULL);
-        retcode = SQLBindCol(hstmt, 3, SQL_C_CHAR, time, 15, NULL);
-        retcode = SQLBindCol(hstmt, 4, SQL_C_CHAR, group, 15, NULL);
-        retcode = SQLBindCol(hstmt, 5, SQL_C_SLONG, &auditory, sizeof(auditory), NULL);
-
-        for (int i = 1;; i++)
-        {
-            retcode = SQLFetch(hstmt);
-            if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
-                cout << "Ошибка!";
-            if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-
-                cout << endl;
-
-                cout << i << "." << endl;
-                cout << "  Номер недели: " << week << endl;
-
-                cout << "  День недели: ";
-                for (int k = 0; day[k] != '\0'; k++)
-                    cout << day[k];
-                cout << endl;
-
-                cout << "  Время: ";
-                for (int k = 0; time[k] != '\0'; k++)
-                    cout << time[k];
-                cout << endl;
-
-                cout << "  Название группы: ";
-                for (int k = 0; group[k] != '\0'; k++)
-                    cout << group[k];
-                cout << endl;
-
-                cout << "  Номер аудитории: " << auditory << endl;
-
-            }
-            else
-                break;
-        }
-
-        cout << endl;
-
-    }
-
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-}
-
-
-bool DataMapper::remove(schedule sched)
-{
-
-    cout << sched;
-
-    SQLINTEGER week = sched.getWeekNumber();
-    SQLWCHAR day[20];
-    SQLWCHAR time[20];
-    SQLWCHAR group[20];
-    SQLINTEGER auditory = sched.getClassroomNumber();
-
-    strcpy_s((char*)group, strlen(sched.getGroupName().c_str()) + 1, sched.getGroupName().c_str());
-    strcpy_s((char*)time, strlen(sched.getTimePeriod().c_str()) + 1, sched.getTimePeriod().c_str());
-    strcpy_s((char*)day, strlen(sched.getDayOfWeek().c_str()) + 1, sched.getDayOfWeek().c_str());
-
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &week, 0, NULL);
-    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, day, 255, NULL);
-    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, time, 255, NULL);
-    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
-    retcode = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &auditory, 0, NULL);
-
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"delete from schedule where week = ? and day = ? and time = ? and groupp = ? and auditory = ?", SQL_NTS);
-
-    retcode = SQLExecute(hstmt);
-    if (retcode < 0) return false;
-
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-
-    return true;
-}
-*/
