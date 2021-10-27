@@ -47,9 +47,10 @@ int main() {
 
 			system("cls");
 
-			cout << "  ¬ведите неделю, день, врем€, группу и аудиторию через ENTER" << endl;
+			cout << "  ¬ведите неделю, день, врем€ начала, врем€ конца, группу и аудиторию" << endl;
 
 			cin >> sch;
+			cout << sch;
 
 			if (dataMapper.insert(sch))
 				cout << "  ¬ставка выполнена!" << endl;
@@ -87,7 +88,7 @@ int main() {
 			cout << "  ¬ведите пор€дковый номер записи в расписании: ";
 			cin >> editNumber;
 
-			cout << "  ¬ведите новые: неделю, день, врем€, группу и аудиторию через ENTER" << endl;
+			cout << "  ¬ведите новые: неделю, день, врем€ начала, врем€ окончани€ группу и аудиторию" << endl;
 			cin >> sch;
 
 			if (dataMapper.edit(editNumber, sch))
@@ -107,10 +108,7 @@ int main() {
 			cin.get();
 			getline(cin, hours);
 
-			cout << "  ¬ведите номер аудитории: ";
-			cin >> audit;
-
-			dataMapper.find(audit, hours);
+			dataMapper.find(hours);
 
 			break;
 
@@ -118,7 +116,7 @@ int main() {
 		case 5: {
 
 			string hours;
-			int number, audit;
+			int number;
 
 			cout << "  ¬ведите промежутки времени: ";
 
@@ -128,10 +126,7 @@ int main() {
 			cout << "  ¬ведите номер недели: ";
 			cin >> number;
 
-			cout << "  ¬ведите номер аудитории: ";
-			cin >> audit;
-
-			dataMapper.find(audit, hours, number);
+			dataMapper.find(hours, number);
 
 			break;
 		}

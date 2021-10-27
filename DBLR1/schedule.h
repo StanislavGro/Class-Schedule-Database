@@ -8,34 +8,36 @@ class schedule {
 private:
 
 	int id;
-	int classroomNumber; //номер аудитории
 	int weekNumber; //номер недели
-
-	string groupName; //название группы
-	string timePeriod; //временной промежуток
 	string dayOfWeek; //день недели
+	string timeStart; //время начала
+	string timeEnd; //время конца
+	string groupName; //название группы
+	string classroomNumber; //номер аудитории
 
 
 public:
 
 	schedule();
-	schedule(int, int, string, string, string, int);
-	schedule(int, string, string, string, int);
+	schedule(int, int, string, string, string, string, string);
+	schedule(int, string, string, string, string, string);
 	schedule(const schedule &);
 
 	void setID(int);
-	void setClassroomNumber(int);
 	void setWeekNumber(int);
-	void setGroupName(string);
-	void setTimePeriod(string);
 	void setDayOfWeek(string);
+	void setTimeStart(string);
+	void setTimeEnd(string);
+	void setGroupName(string);
+	void setClassroomNumber(int);
 
 	int getID();
-	int getClassroomNumber();
 	int getWeekNumber();
-	string getGroupName();
-	string getTimePeriod();
 	string getDayOfWeek();
+	string getTimeStart();
+	string getTimeEnd();
+	string getGroupName();
+	string getClassroomNumber();
 
 	bool operator==(const schedule&);
 	friend ostream& operator<<(ostream& os, schedule &);

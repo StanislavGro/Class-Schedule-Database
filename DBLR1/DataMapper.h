@@ -36,11 +36,11 @@ public:
     
     bool insert(schedule);
     bool edit(int, schedule);
+    bool edit();//?
     bool remove(int);
     
-    //void find1(string);
-    void find(int, string);
-    void find(int, string, int);
+    void find(string);//?
+    void find(string, int);
 
 };
 
