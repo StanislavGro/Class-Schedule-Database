@@ -49,9 +49,9 @@ bool DataMapper::insert(schedule sched)
 
     scheduleMapper.push_back(sched);
 
+
     int id_auditory = 0;
     int id_group = 0;
-    int id_week = 0;
     int id_day = 0;
     int id_time = 0;
 
@@ -66,9 +66,8 @@ bool DataMapper::insert(schedule sched)
     strcpy_s((char*)group, strlen(sched.getGroupName().c_str()) + 1, sched.getGroupName().c_str());
     strcpy_s((char*)timeStart, strlen(sched.getTimeStart().c_str()) + 1, sched.getTimeStart().c_str());
     strcpy_s((char*)timeEnd, strlen(sched.getTimeEnd().c_str()) + 1, sched.getTimeEnd().c_str());
-    strcpy_s((char*)day , strlen(sched.getDayOfWeek().c_str()) + 1, sched.getDayOfWeek().c_str());
+    strcpy_s((char*)day, strlen(sched.getDayOfWeek().c_str()) + 1, sched.getDayOfWeek().c_str());
     strcpy_s((char*)auditory, strlen(sched.getClassroomNumber().c_str()) + 1, sched.getClassroomNumber().c_str());
-
 
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
@@ -77,16 +76,6 @@ bool DataMapper::insert(schedule sched)
     retcode = SQLExecute(hstmt);
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
 
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
-    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from auditory_table where auditory = ?", SQL_NTS);
-    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_auditory, sizeof(id_auditory), NULL);
-        retcode = SQLFetch(hstmt);
-        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
-            cout << "Ошибка!";
-    }
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    //cout << id_auditory << endl;
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
     retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from groupp_table where groupp = ?", SQL_NTS);
@@ -97,19 +86,26 @@ bool DataMapper::insert(schedule sched)
             cout << "Ошибка!";
     }
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-   //cout << id_group << endl;
+    //cout << id_group << endl;
 
 
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &week, 0, NULL);
-    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from week_table where week = ?", SQL_NTS);
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO auditory_table(auditory)"
+        " VALUES (?)", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    //cout << id_auditory << endl;
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from auditory_table where auditory = ?", SQL_NTS);
     if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_week, sizeof(id_week), NULL);
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_auditory, sizeof(id_auditory), NULL);
         retcode = SQLFetch(hstmt);
         if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
             cout << "Ошибка!";
     }
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    //cout << id_week << endl;
 
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, day, 255, NULL);
@@ -136,7 +132,7 @@ bool DataMapper::insert(schedule sched)
     //cout << id_time << endl;
 
 
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_week, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &week, 0, NULL);
     retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_day, 0, NULL);
     retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_time, 0, NULL);
     retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_group, 0, NULL);
@@ -152,9 +148,229 @@ bool DataMapper::insert(schedule sched)
 
 bool DataMapper::edit(int number, schedule sched)
 {
-
     remove(number);
     insert(sched);
+
+    return true;
+}
+
+
+bool DataMapper::editByDay(int number, string dayStr)
+{
+    int id_day = 0;
+    SQLWCHAR day[20];
+    strcpy_s((char*)day, strlen(dayStr.c_str()) + 1, dayStr.c_str());
+
+
+    int id = 0;
+    vector<int> idVector;
+
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from schedule", SQL_NTS);
+    retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+
+    for (int i = 0; ; i++) {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Error" << endl;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            idVector.push_back(id);
+        else break;
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    SQLINTEGER removeNumber = idVector[number - 1];
+    idVector.clear();
+    idVector.shrink_to_fit();
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, day, 255, NULL);
+    //retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from day_table where day = ?", SQL_NTS);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_day, sizeof(id_day), NULL);
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Ошибка!";
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_day, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"update schedule set day = ? where id = ?", SQL_NTS);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    return true;
+
+}
+
+
+bool DataMapper::editByTime(int number, string timeStartStr, string timeEndStr)
+{
+
+    int id_time = 0;
+    SQLWCHAR time_start[20];
+    SQLWCHAR time_end[20];
+    strcpy_s((char*)time_start, strlen(timeStartStr.c_str()) + 1, timeStartStr.c_str());
+    strcpy_s((char*)time_end, strlen(timeEndStr.c_str()) + 1, timeEndStr.c_str());
+
+
+    int id = 0;
+    vector<int> idVector;
+
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from schedule", SQL_NTS);
+    retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+
+    for (int i = 0; ; i++) {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Error" << endl;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            idVector.push_back(id);
+        else break;
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    SQLINTEGER removeNumber = idVector[number - 1];
+    idVector.clear();
+    idVector.shrink_to_fit();
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, time_start, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, time_end, 255, NULL);
+    //retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from time_table where time_start = ? and time_end = ?", SQL_NTS);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_time, sizeof(id_time), NULL);
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Ошибка!";
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_time, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"update schedule set time = ? where id = ?", SQL_NTS);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    return true;
+}
+
+
+bool DataMapper::editByGroup(int number, string groupStr)
+{
+
+    int id_group = 0;
+    SQLWCHAR group[20];
+    strcpy_s((char*)group, strlen(groupStr.c_str()) + 1, groupStr.c_str());
+
+
+    int id = 0;
+    vector<int> idVector;
+
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from schedule", SQL_NTS);
+    retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+
+    for (int i = 0; ; i++) {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Error" << endl;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            idVector.push_back(id);
+        else break;
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    SQLINTEGER removeNumber = idVector[number - 1];
+    idVector.clear();
+    idVector.shrink_to_fit();
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO groupp_table(groupp)"
+        "VALUES (?)", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
+    //retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from groupp_table where groupp = ?", SQL_NTS);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_group, sizeof(id_group), NULL);
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Ошибка!";
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_group, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"update schedule set groupp = ? where id = ?", SQL_NTS);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    return true;
+}
+
+
+bool DataMapper::editByAuditory(int number, string auditoryStr)
+{
+
+    int id_auditory = 0;
+    SQLWCHAR auditory[20];
+    strcpy_s((char*)auditory, strlen(auditoryStr.c_str()) + 1, auditoryStr.c_str());
+
+
+    int id = 0;
+    vector<int> idVector;
+
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from schedule", SQL_NTS);
+    retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+
+    for (int i = 0; ; i++) {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Error" << endl;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            idVector.push_back(id);
+        else break;
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    SQLINTEGER removeNumber = idVector[number - 1];
+    idVector.clear();
+    idVector.shrink_to_fit();
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO auditory_table(auditory)"
+        " VALUES (?)", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+    //retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from auditory_table where auditory = ?", SQL_NTS);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_auditory, sizeof(id_auditory), NULL);
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Ошибка!";
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_auditory, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"update schedule set auditory = ? where id = ?", SQL_NTS);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
 
     return true;
 }
@@ -192,13 +408,7 @@ bool DataMapper::remove(int number)
             cout << "Ошибка!";
     }
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    //cout << id_group << endl;
 
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_group, 0, NULL);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"delete from groupp_table where id = ?;", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    if (retcode < 0) return false;
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
     retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"delete from schedule where id = ?;", SQL_NTS);
@@ -210,13 +420,54 @@ bool DataMapper::remove(int number)
 }
 
 
+bool DataMapper::removeByGroup(string groupStr)
+{
+
+    SQLWCHAR group[20];
+    strcpy_s((char*)group, strlen(groupStr.c_str()) + 1, groupStr.c_str());
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
+    //retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"delete from groupp_table where groupp = ?", SQL_NTS);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    return true;
+}
+
+
+bool DataMapper::removeByAuditory(string auditoryStr)
+{
+
+    SQLWCHAR group[20];
+    strcpy_s((char*)group, strlen(auditoryStr.c_str()) + 1, auditoryStr.c_str());
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
+    //retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"delete from auditory_table where auditory = ?", SQL_NTS);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+    return true;
+}
+
+
 void DataMapper::find(string str)
 {
-    vector<string> result;
-    vector<string> hourtable;
+    vector<string> result, hourtable, auditForPrint;
+    vector<vector<string>> freeAuditory;
+
+    for (int i = 0; i < 18; i++) {
+        freeAuditory.push_back(vector<string>());
+        freeAuditory[i].push_back("Понедельник");
+        freeAuditory[i].push_back("Вторник");
+        freeAuditory[i].push_back("Среда");
+        freeAuditory[i].push_back("Четверг");
+        freeAuditory[i].push_back("Пятница");
+        freeAuditory[i].push_back("Суббота");
+    }
 
     stringstream data(str);
-
     string line;
 
     while (getline(data, line, ' '))
@@ -224,79 +475,77 @@ void DataMapper::find(string str)
 
     int n = result.size();
 
-    for (int q = 0; q < n; q++) {
-        stringstream data2(result[q]);
-        string line2;
-        while (getline(data2, line2, '-'))
-            hourtable.push_back(line2);
-        //cout << hourtable[2*q] << " - " << hourtable[2*q+1] << endl;
+    for (int i = 0; i < n; i++) {
+        data.str(string()); //обычная очитска
+        data.clear();       //сброс всех флагов ошибок
+        line.clear();
+        data.str(result[i]);
+        while (getline(data, line, '-'))
+            hourtable.push_back(line);
+        //cout << hourtable[2*i] << " - " << hourtable[2*i+1] << endl;
     }
-
     
-    SQLWCHAR** hours = new SQLWCHAR* [n*2];
+    SQLWCHAR** SQLHOURS = new SQLWCHAR* [n*2]; //т.к из одного промежутка получается 2 строки
 
-    for (int k = 0; k < n * 2; k++) {
-        hours[k] = new SQLWCHAR[hourtable[k].size()];
-        strcpy_s((char*)hours[k], strlen(hourtable[k].c_str()) + 1, hourtable[k].c_str());
+    for (int i = 0; i < n * 2; i++) {
+        SQLHOURS[i] = new SQLWCHAR[hourtable[i].size()];
+        strcpy_s((char*)SQLHOURS[i], strlen(hourtable[i].c_str()) + 1, hourtable[i].c_str());
     }
 
-    SQLRETURN* newRetcode = new SQLRETURN(n*2);
+    SQLRETURN* SQLRETCODE = new SQLRETURN(n*2); //т.к в 2р больше бинд параметров
 
-    for (int k = 0; k < n*2; k+=2) {
-        newRetcode[k] = SQLBindParameter(hstmt, k + 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, hours[k], 255, NULL);
-        newRetcode[k+1] = SQLBindParameter(hstmt, k + 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, hours[k+1], 255, NULL);
+    for (int i = 0; i < n*2; i+=2) {
+        SQLRETCODE[i] = SQLBindParameter(hstmt, i + 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, SQLHOURS[i], 255, NULL);
+        SQLRETCODE[i+1] = SQLBindParameter(hstmt, i + 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, SQLHOURS[i+1], 255, NULL);
     }
-    //newRetcode[n] = SQLBindParameter(hstmt, n + 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 255, 0, &audit, 255, NULL);
 
-
-    wstring output = L"select sc.*, w.week, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
+    /*wstring output = L"select sc.*, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
         "from schedule as sc "
-        "join week_table as w on w.id = sc.week "
+        "join day_table as d on d.id = sc.day "
+        "join time_table as ti on ti.id = sc.time "
+        "join groupp_table as gr on gr.id = sc.groupp "
+        "join auditory_table as au on au.id = sc.auditory where (time_start = ? and time_end = ?)";*/
+
+    wstring output = L"select sc.*, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
+        "from schedule as sc "
         "join day_table as d on d.id = sc.day "
         "join time_table as ti on ti.id = sc.time "
         "join groupp_table as gr on gr.id = sc.groupp "
         "join auditory_table as au on au.id = sc.auditory where (time_start = ? and time_end = ?)";
 
-    //wcout << output << endl;
-
-    for (int k = 0; k < n - 1; k++)
+    for (int i = 0; i < n - 1; i++)
         output += L" or (time_start = ? and time_end = ?)";
 
     //wcout << output << endl;
 
     retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
 
-    //retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, hours, 255, NULL);
-
     int week = 0;
-    char day[20];
-    char time_start[20];
-    char time_end[20];
-    char group[20];
-    int auditory = 0;
+    char day[20] = "";
+    char time_start[20] = "";
+    char time_end[20] = "";
+    char group[20] = "";
+    char auditory[20] = "";
 
-    //const char* charOutput = output.c_str();
-    //wcout << output << endl;
-
-    //retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
 
     if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 
-        retcode = SQLBindCol(hstmt, 7, SQL_C_SLONG, &week, sizeof(week), NULL);
-        retcode = SQLBindCol(hstmt, 8, SQL_C_CHAR, day, 20, NULL);
-        retcode = SQLBindCol(hstmt, 9, SQL_C_CHAR, time_start, 20, NULL);
-        retcode = SQLBindCol(hstmt, 10, SQL_C_CHAR, time_end, 20, NULL);
-        retcode = SQLBindCol(hstmt, 11, SQL_C_CHAR, group, 20, NULL);
-        retcode = SQLBindCol(hstmt, 12, SQL_C_SLONG, &auditory, sizeof(auditory), NULL);
+        retcode = SQLBindCol(hstmt, 2, SQL_C_SLONG, &week, sizeof(week), NULL);
+        retcode = SQLBindCol(hstmt, 7, SQL_C_CHAR, day, 20, NULL);
+        retcode = SQLBindCol(hstmt, 8, SQL_C_CHAR, time_start, 20, NULL);
+        retcode = SQLBindCol(hstmt, 9, SQL_C_CHAR, time_end, 20, NULL);
+        retcode = SQLBindCol(hstmt, 10, SQL_C_CHAR, group, 20, NULL);
+        retcode = SQLBindCol(hstmt, 11, SQL_C_CHAR, auditory, 20, NULL);
 
-        cout << "-----------------------------" << endl;
-        cout << "**ЗАНЯТЫЕ АУДИТОРИИ ПО ДНЯМ**" << endl;
-        cout << "-----------------------------";
+        cout << "---------------------------------" << endl;
+        cout << "**ЗАНЯТЫЕ АУДИТОРИИ В ЭТО ВРЕМЯ**" << endl;
+        cout << "---------------------------------";
 
 
         for (int i = 1;; i++)
         {
             retcode = SQLFetch(hstmt);
+
             if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
                 cout << "Ошибка!";
             if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
@@ -326,171 +575,297 @@ void DataMapper::find(string str)
                     cout << group[k];
                 cout << endl;
 
-                cout << "  Номер аудитории: " << auditory << endl;
+                cout << "  Номер аудитории: ";
+                for (int k = 0; auditory[k] != '\0'; k++)
+                    cout << auditory[k];
+                cout << endl;
 
             }
             else
                 break;
         }
+    
     }
-    cout << "--------------------------------------" << endl;
-
-    cout << "**ВСЕ ОСТАЛЬНЫЕ АУДИТОРИИ СВОБОДНЫЕ!**" << endl;
-
-    cout << "--------------------------------------\n\n";
 
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
-    result.clear();
-    result.shrink_to_fit();
+    //SQLWCHAR** SQLHOURS = new SQLWCHAR * [n * 2]; //т.к из одного промежутка получается 2 строки
 
-    hourtable.clear();
-    hourtable.shrink_to_fit();
-    
-}
+    //for (int i = 0; i < n * 2; i++) {
+    //    SQLHOURS[i] = new SQLWCHAR[hourtable[i].size()];
+    //    strcpy_s((char*)SQLHOURS[i], strlen(hourtable[i].c_str()) + 1, hourtable[i].c_str());
+    //}
 
+    //SQLRETURN* SQLRETCODE = new SQLRETURN(n * 2); //т.к в 2р больше бинд параметров
 
-void DataMapper::find(string str, int number)
-{
-
-    vector<string> result;
-    vector<string> timetable;
-    vector<vector<string>> hourtable;
-
-    timetable.push_back("Понедельник");
-    timetable.push_back("Вторник");
-    timetable.push_back("Среда");
-    timetable.push_back("Четверг");
-    timetable.push_back("Пятница");
-    timetable.push_back("Суббота");        
-
-    stringstream data(str);
-
-    string line;
-
-    while (getline(data, line, ' '))
-        result.push_back(line);
-
-    int n = result.size();
-
-    for (int i = 0; i < 7; i++) {
-        hourtable.push_back(vector<string>());
-        for (int k = 0; k < n; k++) {
-            hourtable[i].push_back(result[k].substr(0, 4));
-            hourtable[i].push_back(result[k].substr(6, 10));
-
-            cout << hourtable[i][0] << "\n" << hourtable[i][1] << endl;
-        }
+    for (int i = 0; i < n * 2; i += 2) {
+        SQLRETCODE[i] = SQLBindParameter(hstmt, i + 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, SQLHOURS[i], 255, NULL);
+        SQLRETCODE[i + 1] = SQLBindParameter(hstmt, i + 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, SQLHOURS[i + 1], 255, NULL);
     }
-    /*
-    SQLWCHAR** hours = new SQLWCHAR * [n];
-    SQLINTEGER num = number;
 
-    for (int k = 0; k < n; k++)
-        hours[k] = new SQLWCHAR[result[k].size()];
+    wstring output1 = L"select sc.week, d.day, ti.time_start, ti.time_end, au.auditory "
+        "from schedule as sc "
+        "join day_table as d on d.id = sc.day "
+        "join time_table as ti on ti.id = sc.time "
+        "join auditory_table as au on au.id = sc.auditory where (time_start = ? and time_end = ?)";
 
-    SQLRETURN* newRetcode = new SQLRETURN(n+2);
+    for (int i = 0; i < n - 1; i++)
+        output1 += L" or (time_start = ? and time_end = ?)";
 
-    for (int k = 0; k < n; k++)
-        strcpy_s((char*)hours[k], strlen(result[k].c_str()) + 1, result[k].c_str());
+    //wcout << output1 << endl;
 
-
-    for (int k = 0; k < n; k++)
-        newRetcode[k] = SQLBindParameter(hstmt, k + 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, hours[k], 255, NULL);
-    newRetcode[n] = SQLBindParameter(hstmt, n+1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 255, 0, &num, 255, NULL);
-    newRetcode[n+1] = SQLBindParameter(hstmt, n + 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 255, 0, &audit, 255, NULL);
-
-
-    wstring output = L"select week, day, time, auditory from schedule where (time = ?";
-
-    for (int k = 0; k < n - 1; k++)
-        output += L" or time = ?";
-
-    output += L") and week = ? and auditory = ?";
-
-    //retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, hours, 255, NULL);
-
-    int week = 0;
-    char day[20];
-    char time[20];
-    //char group[20];
-    int auditory = 0;
-
-    //const char* charOutput = output.c_str();
-
-    //wcout << output << endl;
-
-    retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
+    retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output1.c_str()), SQL_NTS);
 
     if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 
         retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &week, sizeof(week), NULL);
         retcode = SQLBindCol(hstmt, 2, SQL_C_CHAR, day, 20, NULL);
-        retcode = SQLBindCol(hstmt, 3, SQL_C_CHAR, time, 20, NULL);
-        //retcode = SQLBindCol(hstmt, 4, SQL_C_CHAR, group, 15, NULL);
-        retcode = SQLBindCol(hstmt, 4, SQL_C_SLONG, &auditory, sizeof(auditory), NULL);
+        retcode = SQLBindCol(hstmt, 5, SQL_C_CHAR, auditory, 20, NULL);
+
+        cout << endl;
+        cout << "Аудитория(-и) ";
 
         for (int i = 1;; i++)
         {
-            
+
             retcode = SQLFetch(hstmt);
             if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
                 cout << "Ошибка!";
             if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-                
-                auto it = std::find(timetable.begin(), timetable.end(), string(day));
 
-                //cout << std::distance(timetable.begin(), it) << endl;
+                auto iterator = std::find(auditForPrint.begin(), auditForPrint.end(), string(auditory));
 
-                auto it2 = std::find(hourtable[std::distance(timetable.begin(), it)].begin(), hourtable[std::distance(timetable.begin(), it)].end(), string(time));
-                if (it2 != hourtable[std::distance(timetable.begin(), it)].end())
-                    hourtable[std::distance(timetable.begin(), it)].erase(it2);
+                if (iterator == auditForPrint.end()) {
+                    i != 1 ? cout << ", " : cout;
 
-                if(hourtable[std::distance(timetable.begin(), it)].empty())
-                    timetable[std::distance(timetable.begin(), it)] = "-1";
+                    for (int k = 0; auditory[k] != '\0'; k++)
+                        cout << auditory[k];
+                    auditForPrint.push_back(auditory);
+                }
 
+                auto it = freeAuditory.begin();
+                for (int k = 0; k < week-1; k++)
+                    it++;
+                //cout << std::distance(freeAuditory.begin(), it) << endl;
+                auto it2 = std::find(freeAuditory[std::distance(freeAuditory.begin(), it)].begin(), freeAuditory[std::distance(freeAuditory.begin(), it)].end(), string(day));
+                //cout << std::distance(freeAuditory[std::distance(freeAuditory.begin(), it)].begin(), it2) << endl;
+                if (it2 != freeAuditory[std::distance(freeAuditory.begin(), it)].end())
+                    freeAuditory[std::distance(freeAuditory.begin(), it)].erase(it2);
             }
-            else
+            else {
+                cout << " в течении семестра свободна(-ы) на:" << endl;
                 break;
+            }
+
         }
 
-        cout << "Список свободных аудиторий: " << endl;
-        
-
-        for (int i = 0, s=1; i < timetable.size(); i++)   
-            if (timetable[i] != "-1")
-                for (int k = 0; k < hourtable[i].size(); k++, s++) {
-                    cout << endl;
-
-                    cout << s << "." << endl;
-                    cout << "  Номер недели: " << number << endl;
-
-                    cout << "  День недели: " << timetable[i] << endl;
-
-                    cout << "  Время: " << hourtable[i][k] << endl;
-
-                    cout << "  Название группы: ПУСТО" << endl;
-
-                    cout << "  Номер аудитории: " << audit << endl;
-
-                }
-         
         cout << endl;
+
+        for (int i = 0; i < freeAuditory.size(); i++) {
+            cout << i+1 << " неделе:";
+
+            for (int k = 0; k < freeAuditory[i].size(); k++) {
+                cout << " " <<freeAuditory[i][k];
+                k != freeAuditory[i].size() - 1 ? cout << "," : cout << "."<<endl;
+            }
+        }
+
+        cout << endl;
+
+        cout << "-------------------------------------------------------------------------------" << endl;
+        cout << "**ВСЕ ОСТАЛЬНЫЕ АУДИТОРИИ В ЗАДАННЫЕ ЧАСЫ В ТЕЧЕНИИ ВСЕГО СЕМЕСТРА СВОБОДНЫЕ!**" << endl;
+        cout << "-------------------------------------------------------------------------------\n\n";
 
     }
 
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
     result.clear();
     result.shrink_to_fit();
 
-    timetable.clear();
-    timetable.shrink_to_fit();
+    auditForPrint.clear();
+    auditForPrint.shrink_to_fit();
 
     hourtable.clear();
     hourtable.shrink_to_fit();
 
-    */
+    freeAuditory.clear();
+    freeAuditory.shrink_to_fit();
+    
+}
+
+
+void DataMapper::find(int hoursNumber, int weekNumber)
+{
+
+    vector<string> auditories, daysOfWeek;
+    vector<vector<string>> hourtable;
+
+    int lessons = hoursNumber * 60 / 90;
+
+    if (lessons > 42) {
+        cout << "  В одной неделе не может быть столько пар" << endl;
+        return;
+    }
+
+    daysOfWeek.push_back("понедельник");
+    daysOfWeek.push_back("вторник");
+    daysOfWeek.push_back("среду");
+    daysOfWeek.push_back("четверг");
+    daysOfWeek.push_back("пятницу");
+    daysOfWeek.push_back("субботу");
+
+    int week = 0;
+    char day[20] = "";
+    char time[20] = "";
+    char group[20] = "";
+    char auditory[20] = "";
+
+    int day_id = 0;
+    int time_id = 0;
+
+
+    SQLINTEGER sqlWeek = weekNumber;
+    bool isFind = false;
+
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select(auditory) from auditory_table", SQL_NTS);
+    retcode = SQLBindCol(hstmt, 1, SQL_C_CHAR, auditory, 20, NULL);
+
+    for (int i = 0; ; i++) {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Error" << endl;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            auditories.push_back(auditory);
+        else break;
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    for (int i = 1; isFind == false; i++) {
+
+        for (int i = 0; i < 6; i++) {
+            hourtable.push_back(vector<string>());
+            hourtable[i].push_back("8:30-10:00");
+            hourtable[i].push_back("10:15-11:45");
+            hourtable[i].push_back("12:00-13:30");
+            hourtable[i].push_back("14:00-15:30");
+            hourtable[i].push_back("15:45-17:15");
+            hourtable[i].push_back("17:30-19:00");
+            hourtable[i].push_back("19:15-20:45");
+        }
+
+        SQLWCHAR auditory[20];
+        //cout << auditories[i - 1] << endl;
+        strcpy_s((char*)auditory, strlen(auditories[i - 1].c_str()) + 1, auditories[i - 1].c_str());
+
+        retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &sqlWeek, 0, NULL);
+        retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+
+        wstring output = L"select sc.day, sc.time "
+            "from schedule as sc "
+            "join auditory_table as au on au.id = sc.auditory where sc.week = ? and au.auditory = ?";
+
+        //wcout << output << endl;
+
+        retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
+
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+            retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &day_id, sizeof(day_id), NULL);
+            retcode = SQLBindCol(hstmt, 2, SQL_C_SLONG, &time_id, sizeof(time_id), NULL);
+
+            for (int k = 1;; k++)
+            {
+                retcode = SQLFetch(hstmt);
+                if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+                    cout << "Ошибка!";
+                if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+                    auto it = hourtable.begin();
+                    for (int j = 0; j < day_id - 1; j++)
+                        it++;
+
+                    //cout << std::distance(hourtable.begin(), it) << endl;
+                    auto it2 = hourtable[std::distance(hourtable.begin(), it)].begin();
+
+                    for (int j = 0; j < time_id - 1; j++)
+                        it2++;
+
+                    if (it2 != hourtable[std::distance(hourtable.begin(), it)].end()) {
+                        *it2 = "";
+                    }
+                }
+                else
+                    break;
+            }
+
+            //проверяем, хватит ли вообще занятий для этой аудитории
+            for (int k = 0; k < hourtable.size() && lessons != 0; k++)
+                for (int j = 0; j < hourtable[k].size() && lessons != 0; j++) {
+                    if (hourtable[k][j] == "")
+                        continue;
+                    else
+                        lessons--;
+                }
+
+            if (!lessons) {
+
+                lessons = hoursNumber * 60 / 90;
+
+                cout << endl;
+                cout << "Для аудитории " << auditories[i-1];
+                cout << " есть возможность заниматься " << lessons << " занятия(-ие/-ий):";
+
+                for (int k = 0; k < hourtable.size(); k++) {
+                    k != 1 ? cout << "\nВ " << daysOfWeek[k] << " в " : cout << "\nВо " << daysOfWeek[k] << " в ";
+                    for (int j = 0; j < hourtable[k].size() && lessons != 0; j++, lessons--) {
+                        if (hourtable[k][j] != "") {
+                            cout << hourtable[k][j];
+                            j == hourtable[k].size() - 1 or lessons - 1 == 0 ? cout << "." : cout << ", ";
+                        }
+                        else
+                            lessons++;
+                    }
+                    if (!lessons) {
+                        isFind = true;
+                        break;
+                    }
+                }
+                cout << "\n\n";
+
+            }
+            else
+                lessons = hoursNumber * 60 / 90;
+
+            retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+            retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+            retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+        }
+
+        hourtable.clear();
+        hourtable.shrink_to_fit();
+    }
+
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    auditories.clear();
+    auditories.shrink_to_fit();
+
+    daysOfWeek.clear();
+    daysOfWeek.shrink_to_fit();
+
+    hourtable.clear();
+    hourtable.shrink_to_fit();
+
 }
 
 
@@ -500,7 +875,7 @@ void DataMapper::creatingTables()
     retcode = SQLPrepare(hstmt,
         (SQLWCHAR*)L"create table if not exists auditory_table("
         "id serial primary key,"
-        "auditory int unique"
+        "auditory varchar(20) unique"
         "); ", SQL_NTS);
     retcode = SQLExecute(hstmt);
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
@@ -510,15 +885,6 @@ void DataMapper::creatingTables()
         (SQLWCHAR*)L"create table if not exists groupp_table("
         "id serial primary key,"
         "groupp varchar(20) unique"
-        "); ", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-
-
-    retcode = SQLPrepare(hstmt,
-        (SQLWCHAR*)L"create table if not exists week_table("
-        "id serial primary key,"
-        "week int unique check (week >= 1 and week <= 18)"
         "); ", SQL_NTS);
     retcode = SQLExecute(hstmt);
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
@@ -547,33 +913,14 @@ void DataMapper::creatingTables()
     retcode = SQLPrepare(hstmt,
         (SQLWCHAR*)L"create table if not exists schedule ("
         "id serial primary key,"
-        "week int references week_table(id) on update cascade on delete cascade,"
+        "week int check (week >= 1 and week <= 18),"
         "day int references day_table(id) on update cascade on delete cascade,"
         "time int references time_table(id) on update cascade on delete cascade,"
         "groupp int references groupp_table(id) on update cascade on delete cascade,"
-        "auditory int references auditory_table(id) on update cascade on delete cascade"
-        "); ", SQL_NTS);
+        "auditory int references auditory_table(id) on update cascade on delete cascade,"
+        "unique(week, day, time, auditory)); ", SQL_NTS);
     retcode = SQLExecute(hstmt);
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-
-
-    for (int i = 101; i <= 820; i++) {
-        if (i % 100 < 21) {
-            retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &i, 0, NULL);
-            retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO auditory_table(auditory) VALUES (?)", SQL_NTS);
-            retcode = SQLExecute(hstmt);
-            retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-        }
-        else
-            i += 79;
-    }
-    
-    for (int i = 1; i <= 18; i++) {
-        retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &i, 0, NULL);
-        retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO week_table(week) VALUES (?)", SQL_NTS);
-        retcode = SQLExecute(hstmt);
-        retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    }
     
 
     retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Понедельник')", SQL_NTS);
@@ -592,6 +939,29 @@ void DataMapper::creatingTables()
     retcode = SQLExecute(hstmt);
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
     retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Суббота')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+
+
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('8:30', '10:00')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('10:15', '11:45')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('12:00', '13:30')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('14:00', '15:30')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('15:45', '17:15')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('17:30', '19:00')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('19:15', '20:45')", SQL_NTS);
     retcode = SQLExecute(hstmt);
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
 
@@ -614,20 +984,21 @@ void DataMapper::printAll()
     int id_auditory = 0;
 
     int week = 0;
-    char day [20];
-    char time_start[20];
-    char time_end[20];
-    char group [20];
-    char auditory [20];
+    char day [20] = "";
+    char time_start[20] = "";
+    char time_end[20] = "";
+    char group[20] = "";
+    char auditory[20] = "";
 
     //retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select week, day, time, groupp, auditory from schedule", SQL_NTS);
-    wstring output = L"select sc.*, w.week, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
+    wstring output = L"select sc.*, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
         "from schedule as sc "
-        "join week_table as w on w.id = sc.week "
         "join day_table as d on d.id = sc.day "
         "join time_table as ti on ti.id = sc.time "
         "join groupp_table as gr on gr.id = sc.groupp "
-        "join auditory_table as au on au.id = sc.auditory";
+        "join auditory_table as au on au.id = sc.auditory "
+        "order by (sc.week, d.day, ti.time_start, ti.time_end, au.auditory)";
+
 
     //wcout << output << endl;
 
@@ -636,12 +1007,12 @@ void DataMapper::printAll()
 
     if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
          
-        retcode = SQLBindCol(hstmt, 7, SQL_C_SLONG, &week, sizeof(week), NULL);
-        retcode = SQLBindCol(hstmt, 8, SQL_C_CHAR, day, 20, NULL);
-        retcode = SQLBindCol(hstmt, 9, SQL_C_CHAR, time_start, 20, NULL);
-        retcode = SQLBindCol(hstmt, 10, SQL_C_CHAR, time_end, 20, NULL);
-        retcode = SQLBindCol(hstmt, 11, SQL_C_CHAR, group, 20, NULL);
-        retcode = SQLBindCol(hstmt, 12, SQL_C_CHAR, auditory, 20, NULL);
+        retcode = SQLBindCol(hstmt, 2, SQL_C_SLONG, &week, sizeof(week), NULL);
+        retcode = SQLBindCol(hstmt, 7, SQL_C_CHAR, day, 20, NULL);
+        retcode = SQLBindCol(hstmt, 8, SQL_C_CHAR, time_start, 20, NULL);
+        retcode = SQLBindCol(hstmt, 9, SQL_C_CHAR, time_end, 20, NULL);
+        retcode = SQLBindCol(hstmt, 10, SQL_C_CHAR, group, 20, NULL);
+        retcode = SQLBindCol(hstmt, 11, SQL_C_CHAR, auditory, 20, NULL);
 
         for (int i = 1;; i++)
         {
@@ -723,3 +1094,156 @@ DataMapper::~DataMapper()
     scheduleMapper.shrink_to_fit();
 
 }
+
+
+/*for (int i = 0; i < 7; i++) {
+    hourtable.push_back(vector<string>());
+    for (int k = 0; k < n; k++) {
+        hourtable[i].push_back(result[k].substr(0, 4));
+        hourtable[i].push_back(result[k].substr(6, 10));
+
+        cout << hourtable[i][0] << "\n" << hourtable[i][1] << endl;
+    }
+}*/
+/*wstringstream ws;
+wstring str;
+
+ws << weekNumber;
+ws >> str;
+
+wstring output = L"select sc.week, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
+    "from schedule as sc "
+    "join day_table as d on d.id = sc.day "
+    "join time_table as ti on ti.id = sc.time "
+    "join groupp_table as gr on gr.id = sc.groupp "
+    "join auditory_table as au on au.id = sc.auditory "
+    "where sc.week = " + str;
+
+wcout << output << endl;*/
+/*
+wstringstream ws;
+wstring str;
+
+ws << weekNumber;
+ws >> str;
+
+wstring output = L"select sc.week, au.auditory "
+    "from schedule as sc "
+    "join auditory_table as au on au.id = sc.auditory "
+    "where sc.week = " + str;
+
+output += L" group by au.auditory, sc.week order by sc.week";
+
+wcout << output << endl;
+
+
+retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
+
+if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+    retcode = SQLBindCol(hstmt, 2, SQL_C_CHAR, auditory, 20, NULL);
+
+    for (int i = 1;; i++)
+    {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "Ошибка!";
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+            cout << endl;
+
+            cout << i << "." << endl;
+            cout << "  Номер недели: " << week << endl;
+
+            cout << "  День недели: ";
+            for (int k = 0; day[k] != '\0'; k++)
+                cout << day[k];
+            cout << endl;
+
+            cout << "  Время начала: ";
+            for (int k = 0; time_start[k] != '\0'; k++)
+                cout << time_start[k];
+            cout << endl;
+
+            cout << "  Время окончания: ";
+            for (int k = 0; time_end[k] != '\0'; k++)
+                cout << time_end[k];
+            cout << endl;
+
+            cout << "  Название группы: ";
+            for (int k = 0; group[k] != '\0'; k++)
+                cout << group[k];
+            cout << endl;
+
+            cout << "  Номер аудитории: ";
+            for (int k = 0; auditory[k] != '\0'; k++)
+                cout << auditory[k];
+            cout << endl;
+
+        }
+        else
+            break;
+    }
+
+
+}
+
+
+if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+    retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &week,      sizeof(week), NULL);
+    retcode = SQLBindCol(hstmt, 2, SQL_C_CHAR,  day,        20,           NULL);
+    retcode = SQLBindCol(hstmt, 3, SQL_C_CHAR,  time_start, 20,           NULL);
+    retcode = SQLBindCol(hstmt, 4, SQL_C_CHAR,  time_end,   20,           NULL);
+    retcode = SQLBindCol(hstmt, 5, SQL_C_CHAR,  group,      20,           NULL);
+    retcode = SQLBindCol(hstmt, 6, SQL_C_CHAR,  auditory,   20,           NULL);
+
+    //for (int i = 1;; i++)
+    //{
+    //
+    //    retcode = SQLFetch(hstmt);
+    //    if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+    //        cout << "Ошибка!";
+    //    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+    //
+    //        auto it = std::find(timetable.begin(), timetable.end(), string(day));
+
+    //        //cout << std::distance(timetable.begin(), it) << endl;
+
+    //        auto it2 = std::find(hourtable[std::distance(timetable.begin(), it)].begin(), hourtable[std::distance(timetable.begin(), it)].end(), string(time));
+    //        if (it2 != hourtable[std::distance(timetable.begin(), it)].end())
+    //            hourtable[std::distance(timetable.begin(), it)].erase(it2);
+
+    //        if(hourtable[std::distance(timetable.begin(), it)].empty())
+    //            timetable[std::distance(timetable.begin(), it)] = "-1";
+
+    //    }
+    //    else
+    //        break;
+    //}
+
+    cout << "Список свободных аудиторий: " << endl;
+
+
+    /*for (int i = 0, s=1; i < timetable.size(); i++)
+        if (timetable[i] != "-1")
+            for (int k = 0; k < hourtable[i].size(); k++, s++) {
+                cout << endl;
+
+                cout << s << "." << endl;
+                cout << "  Номер недели: " << number << endl;
+
+                cout << "  День недели: " << timetable[i] << endl;
+
+                cout << "  Время: " << hourtable[i][k] << endl;
+
+                cout << "  Название группы: ПУСТО" << endl;
+
+                cout << "  Номер аудитории: " << audit << endl;
+
+            }
+
+    cout << endl;
+
+}
+*/

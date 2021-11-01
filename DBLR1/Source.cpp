@@ -11,14 +11,20 @@ using namespace::std;
 
 void console() {
 
-	cout << "1. Добавить запись" << endl;
+	cout << "1. Добавить запись\n" << endl;
 	cout << "2. Удалить запись по номеру" << endl;
-	cout << "3. Редактировать запись по номеру" << endl;
-	cout << "4. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
-	cout << "5. Поиск свободной аудитории на заданное число часов в указанную неделю" << endl;
-	cout << "6. Просмотр таблицы" << endl;
-	cout << "7. Очистка экрана" << endl;
-	cout << "8. Завершение сесии\n\n";
+	cout << "3. Удалить записи по группе" << endl;
+	cout << "4. Удалить записи по аудитории\n" << endl;
+	cout << "5. Редактировать запись по номеру" << endl;
+	cout << "6. Редактировать день в записи по номеру" << endl;
+	cout << "7. Редактировать время в записи по номеру" << endl;
+	cout << "8. Редактировать группу в записи по номеру" << endl;
+	cout << "9. Редактировать аудиторию в записи по номеру\n" << endl;
+	cout << "10. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
+	cout << "11. Поиск свободной аудитории на заданное число часов в указанную неделю\n" << endl;
+	cout << "12. Просмотр таблицы" << endl;
+	cout << "13. Очистка экрана" << endl;
+	cout << "14. Завершение сесии\n\n";
 
 }
 
@@ -50,7 +56,7 @@ int main() {
 			cout << "  Введите неделю, день, время начала, время конца, группу и аудиторию" << endl;
 
 			cin >> sch;
-			cout << sch;
+			cout << "\n" <<sch;
 
 			if (dataMapper.insert(sch))
 				cout << "  Вставка выполнена!" << endl;
@@ -82,6 +88,36 @@ int main() {
 		}
 		case 3: {
 
+			string deleteGroupp;
+
+			cout << "  Введите группу: ";
+			cin >> deleteGroupp;
+
+			if (dataMapper.removeByGroup(deleteGroupp))
+				cout << "  Удаление выполнено!" << endl;
+			else
+				cout << "  Произошла ошибка!" << endl;
+
+			break;
+
+		}
+		case 4: {
+
+			string deleteAuditory;
+
+			cout << "  Введите аудиторию: ";
+			cin >> deleteAuditory;
+
+			if (dataMapper.removeByAuditory(deleteAuditory))
+				cout << "  Удаление выполнено!" << endl;
+			else
+				cout << "  Произошла ошибка!" << endl;
+
+			break;
+
+		}
+		case 5: {
+
 			schedule sch;
 			int editNumber;
 
@@ -94,11 +130,84 @@ int main() {
 			if (dataMapper.edit(editNumber, sch))
 				cout << "  Запись изменена!" << endl;
 			else
-				cout << "  Произашла ошибка!" << endl;
+				cout << "  Произошла ошибка!" << endl;
 
 			break;
 		}
-		case 4: {
+		case 6: {
+
+			string dayStr;
+			int editNumber;
+
+			cout << "  Введите порядковый номер записи в расписании: ";
+			cin >> editNumber;
+
+			cout << "  Введите новый день недели: ";
+			cin >> dayStr;
+
+			if (dataMapper.editByDay(editNumber, dayStr))
+				cout << "  Запись изменена!" << endl;
+			else
+				cout << "  Произошла ошибка!" << endl;
+
+			break;
+		}case 7: {
+
+			string dayStartStr, dayEndStr;
+			int editNumber;
+
+			cout << "  Введите порядковый номер записи в расписании: ";
+			cin >> editNumber;
+
+			cout << "  Введите время начала: ";
+			cin >> dayStartStr;
+			cout << "  Введите время окончания: ";
+			cin >> dayEndStr;
+
+			if (dataMapper.editByTime(editNumber, dayStartStr, dayEndStr))
+				cout << "  Запись изменена!" << endl;
+			else
+				cout << "  Произошла ошибка!" << endl;
+
+			break;
+		}
+		case 8: {
+
+			string groupStr;
+			int editNumber;
+
+			cout << "  Введите порядковый номер записи в расписании: ";
+			cin >> editNumber;
+
+			cout << "  Введите новую группу: ";
+			cin >> groupStr;
+
+			if (dataMapper.editByGroup(editNumber, groupStr))
+				cout << "  Запись изменена!" << endl;
+			else
+				cout << "  Произошла ошибка!" << endl;
+
+			break;
+		}
+		case 9: {
+
+			string auditoryStr;
+			int editNumber;
+
+			cout << "  Введите порядковый номер записи в расписании: ";
+			cin >> editNumber;
+
+			cout << "  Введите новую аудиторию: ";
+			cin >> auditoryStr;
+
+			if (dataMapper.editByAuditory(editNumber, auditoryStr))
+				cout << "  Запись изменена!" << endl;
+			else
+				cout << "  Произошла ошибка!" << endl;
+
+			break;
+		}
+		case 10: {
 
 			string hours;
 			int audit;
@@ -113,30 +222,27 @@ int main() {
 			break;
 
 		}
-		case 5: {
+		case 11: {
 
-			string hours;
-			int number;
+			int numberWeek, numberHours;
 
-			cout << "  Введите промежутки времени: ";
-
-			cin.get();
-			getline(cin, hours);
+			cout << "  Введите число часов: ";
+			cin >> numberHours;
 
 			cout << "  Введите номер недели: ";
-			cin >> number;
+			cin >> numberWeek;
 
-			dataMapper.find(hours, number);
+			dataMapper.find(numberHours, numberWeek);
 
 			break;
 		}
-		case 6: {
+		case 12: {
 
 			dataMapper.printAll();
 
 			break;
 		}
-		case 7: {
+		case 13: {
 
 			system("cls");
 
@@ -144,7 +250,7 @@ int main() {
 
 			break;
 		}
-		case 8: {
+		case 14: {
 			s = 0;
 			break;
 		}

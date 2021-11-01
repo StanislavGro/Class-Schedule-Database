@@ -23,24 +23,30 @@ private:
 public:
 
     DataMapper();
-    ~DataMapper();
-
-    void creatingTables();
-
     int connectToDB();
     int disconnectFromDB();
+    ~DataMapper();
+
+    void creatingTables();    
     
     vector<schedule> getSchedule();
     
     void printAll();
     
     bool insert(schedule);
+
     bool edit(int, schedule);
-    bool edit();//?
+    bool editByDay(int, string);
+    bool editByTime(int, string, string);
+    bool editByGroup(int, string);
+    bool editByAuditory(int, string);
+
     bool remove(int);
+    bool removeByGroup(string);
+    bool removeByAuditory(string);
     
-    void find(string);//?
-    void find(string, int);
+    void find(string);
+    void find(int, int);
 
 };
 
