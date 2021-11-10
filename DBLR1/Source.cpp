@@ -4,27 +4,37 @@
 #include <sqlext.h>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <algorithm>
+#include <iomanip>
 #include "schedule.h"
 #include "DataMapper.h"
 
 using namespace::std;
 
+void GetConsBuff(int&, int&);
+
+void CenterString(string&, const size_t&);
+
 void console() {
 
-	cout << "1. Добавить запись\n" << endl;
-	cout << "2. Удалить запись по номеру" << endl;
-	cout << "3. Удалить записи по группе" << endl;
-	cout << "4. Удалить записи по аудитории\n" << endl;
-	cout << "5. Редактировать запись по номеру" << endl;
-	cout << "6. Редактировать день в записи по номеру" << endl;
-	cout << "7. Редактировать время в записи по номеру" << endl;
-	cout << "8. Редактировать группу в записи по номеру" << endl;
-	cout << "9. Редактировать аудиторию в записи по номеру\n" << endl;
-	cout << "10. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
-	cout << "11. Поиск свободной аудитории на заданное число часов в указанную неделю\n" << endl;
-	cout << "12. Просмотр таблицы" << endl;
-	cout << "13. Очистка экрана" << endl;
-	cout << "14. Завершение сесии\n\n";
+	string mainStr = "***Расписание занятий!***";
+	CenterString(mainStr, 25u);
+	
+	cout << "   1. Добавить запись\n" << endl;
+	cout << "   2. Удалить запись по номеру" << endl;
+	cout << "   3. Удалить записи по группе" << endl;
+	cout << "   4. Удалить записи по аудитории\n" << endl;
+	cout << "   5. Редактировать запись по номеру" << endl;
+	cout << "   6. Редактировать день в записи по номеру" << endl;
+	cout << "   7. Редактировать время в записи по номеру" << endl;
+	cout << "   8. Редактировать группу в записи по номеру" << endl;
+	cout << "   9. Редактировать аудиторию в записи по номеру\n" << endl;
+	cout << "   10. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
+	cout << "   11. Поиск свободной аудитории на заданное число часов в указанную неделю\n" << endl;
+	cout << "   12. Просмотр таблицы" << endl;
+	cout << "   13. Очистка экрана" << endl;
+	cout << "   14. Завершение сесии\n\n";
 
 }
 
@@ -32,10 +42,9 @@ int main() {
 
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
+	system("color 0A");
 
     DataMapper dataMapper;
-
-	cout << "\t\t\t\t***Расписание занятий!***\n";
 
 	console();
 
@@ -43,7 +52,7 @@ int main() {
 
 	while (s != 0) {
 
-		cout << "Выберите необходимое действие: ";
+		cout << ">> Выберите необходимое действие: ";
 		cin >> func;
 
 		switch (func) {
@@ -53,15 +62,15 @@ int main() {
 
 			system("cls");
 
-			cout << "  Введите неделю, день, время начала, время конца, группу и аудиторию" << endl;
-
+			cout << ">> Введите неделю, день, время начала, время конца, группу и аудиторию:" << endl;
+			cout << ">> ";
 			cin >> sch;
 			cout << "\n" <<sch;
 
 			if (dataMapper.insert(sch))
-				cout << "  Вставка выполнена!" << endl;
+				cout << "!- Вставка выполнена!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			system("pause");
 
@@ -75,13 +84,13 @@ int main() {
 
 			int deleteNumber;
 
-			cout << "  Введите порядковый номер записи в расписании: ";
+			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> deleteNumber;
 
 			if (dataMapper.remove(deleteNumber))
-				cout << "  Удаление выполнено!" << endl;
+				cout << "!- Удаление выполнено!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			break;
 
@@ -90,13 +99,13 @@ int main() {
 
 			string deleteGroupp;
 
-			cout << "  Введите группу: ";
+			cout << "   Введите группу: ";
 			cin >> deleteGroupp;
 
 			if (dataMapper.removeByGroup(deleteGroupp))
-				cout << "  Удаление выполнено!" << endl;
+				cout << "!- Удаление выполнено!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			break;
 
@@ -105,13 +114,13 @@ int main() {
 
 			string deleteAuditory;
 
-			cout << "  Введите аудиторию: ";
+			cout << ">> Введите аудиторию: ";
 			cin >> deleteAuditory;
 
 			if (dataMapper.removeByAuditory(deleteAuditory))
-				cout << "  Удаление выполнено!" << endl;
+				cout << "!- Удаление выполнено!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			break;
 
@@ -121,16 +130,17 @@ int main() {
 			schedule sch;
 			int editNumber;
 
-			cout << "  Введите порядковый номер записи в расписании: ";
+			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
 
-			cout << "  Введите новые: неделю, день, время начала, время окончания группу и аудиторию" << endl;
+			cout << ">> Введите новые: неделю, день, время начала, время окончания, группу и аудиторию:" << endl;
+			cout << ">> ";
 			cin >> sch;
 
 			if (dataMapper.edit(editNumber, sch))
-				cout << "  Запись изменена!" << endl;
+				cout << "!- Запись изменена!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			break;
 		}
@@ -139,35 +149,36 @@ int main() {
 			string dayStr;
 			int editNumber;
 
-			cout << "  Введите порядковый номер записи в расписании: ";
+			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
 
-			cout << "  Введите новый день недели: ";
+			cout << ">> Введите новый день недели: ";
 			cin >> dayStr;
 
 			if (dataMapper.editByDay(editNumber, dayStr))
-				cout << "  Запись изменена!" << endl;
+				cout << "!- Запись изменена!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			break;
-		}case 7: {
+		}
+		case 7: {
 
 			string dayStartStr, dayEndStr;
 			int editNumber;
 
-			cout << "  Введите порядковый номер записи в расписании: ";
+			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
 
-			cout << "  Введите время начала: ";
+			cout << ">> Введите время начала: ";
 			cin >> dayStartStr;
-			cout << "  Введите время окончания: ";
+			cout << ">> Введите время окончания: ";
 			cin >> dayEndStr;
 
 			if (dataMapper.editByTime(editNumber, dayStartStr, dayEndStr))
-				cout << "  Запись изменена!" << endl;
+				cout << "!- Запись изменена!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			break;
 		}
@@ -176,16 +187,16 @@ int main() {
 			string groupStr;
 			int editNumber;
 
-			cout << "  Введите порядковый номер записи в расписании: ";
+			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
 
-			cout << "  Введите новую группу: ";
+			cout << ">> Введите новую группу: ";
 			cin >> groupStr;
 
 			if (dataMapper.editByGroup(editNumber, groupStr))
-				cout << "  Запись изменена!" << endl;
+				cout << "!- Запись изменена!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			break;
 		}
@@ -194,16 +205,16 @@ int main() {
 			string auditoryStr;
 			int editNumber;
 
-			cout << "  Введите порядковый номер записи в расписании: ";
+			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
 
-			cout << "  Введите новую аудиторию: ";
+			cout << ">> Введите новую аудиторию: ";
 			cin >> auditoryStr;
 
 			if (dataMapper.editByAuditory(editNumber, auditoryStr))
-				cout << "  Запись изменена!" << endl;
+				cout << "!- Запись изменена!" << endl;
 			else
-				cout << "  Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;
 
 			break;
 		}
@@ -212,7 +223,7 @@ int main() {
 			string hours;
 			int audit;
 
-			cout << "  Введите промежутки времени: ";
+			cout << ">> Введите промежутки времени: ";
 
 			cin.get();
 			getline(cin, hours);
@@ -226,10 +237,10 @@ int main() {
 
 			int numberWeek, numberHours;
 
-			cout << "  Введите число часов: ";
+			cout << ">> Введите число часов: ";
 			cin >> numberHours;
 
-			cout << "  Введите номер недели: ";
+			cout << ">> Введите номер недели: ";
 			cin >> numberWeek;
 
 			dataMapper.find(numberHours, numberWeek);
@@ -255,7 +266,7 @@ int main() {
 			break;
 		}
 		default: {
-			cout << "Повторите попытку!" << endl;
+			cout << "!- Повторите попытку!" << endl;
 			break;
 		}
 		}
@@ -263,4 +274,38 @@ int main() {
 	}
 
 	return 0;
+}
+
+//Получение размеров окна консоли без прокрутки
+void GetConsBuff(int& x, int& y)
+{
+	HANDLE hWndConsole;
+	if (hWndConsole = GetStdHandle(-12))
+	{
+		CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+		if (GetConsoleScreenBufferInfo(hWndConsole, &consoleInfo))
+		{
+			x = consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1;
+			y = consoleInfo.srWindow.Bottom - consoleInfo.srWindow.Top + 1;
+		}
+		else
+			printf("Error: %d\n", GetLastError());
+	}
+	else
+		printf("Error: %d\n", GetLastError());
+}
+
+void CenterString(string& s, const size_t& width)
+{
+	int buffer_x_size, buffer_y_size;
+	GetConsBuff(buffer_x_size, buffer_y_size);
+	size_t left_bord = (buffer_x_size - width) / 2.;
+	for (;;)
+	{
+		cout << setw(left_bord) << "";
+		cout << s.substr(0u, width) << endl;
+		s.erase(s.begin(), s.begin() + (s.size() < width ? s.size() : width));
+		if (s.empty())
+			break;
+	}
 }

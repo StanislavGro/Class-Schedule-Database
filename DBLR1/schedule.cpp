@@ -73,12 +73,12 @@ bool schedule::operator==(const schedule& sched)
 
 ostream& operator<<(ostream& os, schedule& shed)
 {
-	os << "Номер недели: "	  << shed.weekNumber	  << endl;
-	os << "День недели: "	  << shed.dayOfWeek		  << endl;
-	os << "Время начала: "	  << shed.timeStart	      << endl;
-	os << "Время конца: "	  << shed.timeEnd		  << endl;
-	os << "Название группы: " << shed.groupName		  << endl;
-	os << "Номер аудитории: " << shed.classroomNumber << endl;
+	os << "   Номер недели: "	  << shed.weekNumber	  << endl;
+	os << "   День недели: "		  << shed.dayOfWeek		  << endl;
+	os << "   Время начала: "	  << shed.timeStart	      << endl;
+	os << "   Время конца: "		  << shed.timeEnd		  << endl;
+	os << "   Название группы: "	  << shed.groupName		  << endl;
+	os << "   Номер аудитории: "   << shed.classroomNumber << endl;
 
 	os << endl;
 
