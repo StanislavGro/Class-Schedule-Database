@@ -139,13 +139,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Auditory.cpp" />
     <ClCompile Include="DataMapper.cpp" />
+    <ClCompile Include="Group.cpp" />
     <ClCompile Include="schedule.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Auditory.h" />
     <ClInclude Include="DataMapper.h" />
+    <ClInclude Include="Group.h" />
     <ClInclude Include="schedule.h" />
+    <ClInclude Include="Time.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
