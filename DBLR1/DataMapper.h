@@ -6,6 +6,7 @@
 #include <sqlext.h>
 #include<stdarg.h>
 #include"schedule.h"
+#include"scheduleData.h"
 
 using namespace::std;
 
@@ -13,7 +14,7 @@ class DataMapper
 {
 private:
 
-    vector<schedule> scheduleMapper;
+    //scheduleVector scheduleVectorMapper;
 
     SQLHENV henv; // Дескриптор окружения
     SQLHDBC hdbc; // Дескриптор соединения
@@ -29,7 +30,7 @@ public:
 
     void creatingTables();    
     
-    vector<schedule> getSchedule();
+    //scheduleVector getSchedule();
     
     void printAll();
     

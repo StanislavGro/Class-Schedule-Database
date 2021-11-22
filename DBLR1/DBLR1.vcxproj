@@ -143,6 +143,7 @@
     <ClCompile Include="DataMapper.cpp" />
     <ClCompile Include="Group.cpp" />
     <ClCompile Include="schedule.cpp" />
+    <ClCompile Include="scheduleData.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Time.cpp" />
   </ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="DataMapper.h" />
     <ClInclude Include="Group.h" />
     <ClInclude Include="schedule.h" />
+    <ClInclude Include="scheduleData.h" />
     <ClInclude Include="Time.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,5 +1,8 @@
 #pragma once
 #include<iostream>
+#include"Auditory.h"
+#include"Group.h"
+#include"Time.h"
 
 using namespace::std;
 
@@ -8,12 +11,12 @@ class schedule {
 private:
 
 	int id;
-	int weekNumber; //номер недели
-	string dayOfWeek; //день недели
-	string timeStart; //время начала
-	string timeEnd; //время конца
-	string groupName; //название группы
-	string classroomNumber; //номер аудитории
+	int weekNumber;			//номер недели
+	string dayOfWeek;		//день недели
+	string timeStart;		//время начала
+	string timeEnd;			//время конца
+	Group group;			//название группы
+	Auditory auditory;		//номер аудитории
 
 
 public:
@@ -28,16 +31,16 @@ public:
 	void setDayOfWeek(string);
 	void setTimeStart(string);
 	void setTimeEnd(string);
-	void setGroupName(string);
-	void setClassroomNumber(int);
+	void setGroup(string);
+	void setAuditory(Auditory );
 
 	int getID();
 	int getWeekNumber();
 	string getDayOfWeek();
 	string getTimeStart();
 	string getTimeEnd();
-	string getGroupName();
-	string getClassroomNumber();
+	Group getGroup();
+	Auditory getAuditory();
 
 	bool operator==(const schedule&);
 	friend ostream& operator<<(ostream& os, schedule &);

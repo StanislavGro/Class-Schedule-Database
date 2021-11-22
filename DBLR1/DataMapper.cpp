@@ -47,7 +47,7 @@ int DataMapper::connectToDB()
 bool DataMapper::insert(schedule sched)
 {
 
-    scheduleMapper.push_back(sched);
+    scheduleVectorMapper.getSchedule().push_back(sched);
 
 
     int id_auditory = 0;
@@ -67,7 +67,7 @@ bool DataMapper::insert(schedule sched)
     strcpy_s((char*)timeStart, strlen(sched.getTimeStart().c_str()) + 1, sched.getTimeStart().c_str());
     strcpy_s((char*)timeEnd, strlen(sched.getTimeEnd().c_str()) + 1, sched.getTimeEnd().c_str());
     strcpy_s((char*)day, strlen(sched.getDayOfWeek().c_str()) + 1, sched.getDayOfWeek().c_str());
-    strcpy_s((char*)auditory, strlen(sched.getClassroomNumber().c_str()) + 1, sched.getClassroomNumber().c_str());
+    strcpy_s((char*)auditory, strlen(sched.getAuditory().getAuditoryName().c_str()) + 1, sched.getAuditory().getAuditoryName().c_str());
 
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
@@ -1109,10 +1109,7 @@ void DataMapper::creatingTables()
 }
 
 
-vector<schedule> DataMapper::getSchedule()
-{
-    return scheduleMapper;
-}
+//scheduleVector DataMapper::getSchedule() { return scheduleVectorMapper; }
 
 
 void DataMapper::printAll()
@@ -1241,7 +1238,7 @@ DataMapper::~DataMapper()
     system("color 04");
     cout << ">> Ну пока)" << endl; 
 
-    scheduleMapper.clear();
-    scheduleMapper.shrink_to_fit();
+    scheduleVectorMapper.getSchedule().clear();
+    scheduleVectorMapper.getSchedule().shrink_to_fit();
 
 }

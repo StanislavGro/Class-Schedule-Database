@@ -15,6 +15,10 @@ private:
 
 public:
 
+	Time();
+	Time(string, string);
+	Time(const Time&);
+
 	void setId(int);
 	void setTimeStart(string);
 	void setTimeEnd(string);
@@ -23,4 +27,5 @@ public:
 	string getTimeStart();
 	string getTimeEnd();
 
+	friend bool operator==(const Time&, const Time&);
 };

@@ -10,15 +10,21 @@ class Group
 private:
 
 	int id;
-	string group;
+	string groupName;
 
 public:
 
+	Group();
+	Group(string);
+	Group(const Group&);
+
 	void setId(int);
-	void setGroup(string);
+	void setGroupName(string);
 
 	int getId();
-	string getGroup();
+	string getGroupName();
+
+	friend bool operator==(const Group&, const Group&);
 
 };
 
