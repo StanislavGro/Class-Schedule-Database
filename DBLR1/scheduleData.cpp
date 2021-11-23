@@ -1,65 +1,74 @@
 #include "scheduleData.h"
 #include<iostream>
 #include<vector>
+#include <sstream>
 
 using namespace::std;
 
-bool scheduleData::insertSchedule(schedule sch) 
+bool scheduleData::insertSchedule(schedule* sch) 
 { 
 
     if (!isScheduleExist(sch)) {
-        this->scheduleVector.push_back(sch);
-        return true;
+        this->scheduleVector.push_back(*sch);
+        return insertAuditory(new Auditory(sch->getAuditory()->getAuditoryName())) && insertGroup(new Group(sch->getGroup()->getGroupName()));
     }
 
     return false; 
 }
 
-bool scheduleData::insertAuditory(string audit) { 
-    
-    if (!isAuditoryExist(audit)) {
-        this->auditoryVector.push_back(*(new Auditory(audit)));
-        return true;
-    }
 
-    return false;
-}
-
-bool scheduleData::insertGroup(string gr) {	
-    if (!isAuditoryExist(gr)) {
-        this->groupVector.push_back(*(new Group(gr)));
-        return true;
-    }
-
-    return false;
-}
-
-bool scheduleData::isScheduleExist(schedule sc) 
+bool scheduleData::isScheduleExist(schedule* sch) 
 {
     for (schedule sched : scheduleVector)
-        if (sched == sc)
+        if (sched == *sch)
             return true;
 
     return false;
 }
 
-bool scheduleData::isAuditoryExist(string audit)
+
+bool scheduleData::insertAuditory(Auditory* auditory) {
+
+    if (!isAuditoryExist(auditory)) {
+        this->auditoryVector.push_back(*auditory);
+        return true;
+    }
+
+    return false;
+
+}
+
+
+bool scheduleData::isAuditoryExist(Auditory* auditory)
 {
     for (Auditory au : auditoryVector)
-        if (au.getAuditoryName() == audit)
+        if (au == *auditory)
             return true;
 
     return false;
 }
 
-bool scheduleData::isGroupExist(string gr)
+
+bool scheduleData::insertGroup(Group* group) {	
+    
+    if (!isGroupExist(group)) {
+        this->groupVector.push_back(*group);
+        return true;
+    }
+
+    return false;
+}
+
+
+bool scheduleData::isGroupExist(Group* group)
 {
     for (Group gr : groupVector)
-        if (gr.getGroupName() == gr)
+        if (gr == *group)
             return true;
 
     return false;
 }
+
 
 bool scheduleData::removeInSchedule(int index)
 {
@@ -68,55 +77,25 @@ bool scheduleData::removeInSchedule(int index)
     return true;
 }
 
-bool scheduleData::removeInGroup(string group)
+
+bool scheduleData::removeAllInGroup(Group* group)
 {
 
     bool removed = false;
 
-    auto it = groupVector.begin();
-    auto it2 = scheduleVector.begin();
+    auto itGroup = groupVector.begin();
+    auto itSchedule = scheduleVector.begin();
 
-    for (int i = 0; i < groupVector.size(); i++) {
-        if (groupVector[i].getGroupName() == group) {
-            groupVector.erase(it+i);
+    for (int i = 0; i < groupVector.size(); i++)
+        if (groupVector[i] == *group) {
+            groupVector.erase(itGroup+i);
             removed = true;
         }
-    }
 
     if (removed) {
-        for (int i = 0; i < scheduleVector.size(); i++) {
-            if (scheduleVector[i].getGroup().getGroupName() == group) {
-                scheduleVector.erase(it2 + i);
-
-            }
-        }
-        return true;
-    }
-
-    return false;
-}
-
-bool scheduleData::removeInAuditory(string auditory)
-{
-    bool removed = false;
-
-    auto it = auditoryVector.begin();
-    auto it2 = scheduleVector.begin();
-
-    for (int i = 0; i < auditoryVector.size(); i++) {
-        if (auditoryVector[i].getAuditoryName() == auditory) {
-            auditoryVector.erase(it + i);
-            removed = true;
-        }
-    }
-
-    if (removed) {
-        for (int i = 0; i < scheduleVector.size(); i++) {
-            if (scheduleVector[i].getAuditory().getAuditoryName() == auditory) {
-                scheduleVector.erase(it2 + i);
-
-            }
-        }
+        for (int i = 0; i < scheduleVector.size(); i++)
+            if (*(scheduleVector[i].getGroup()) == *group)
+                scheduleVector.erase(itSchedule + i);
         return true;
     }
 
@@ -124,166 +103,224 @@ bool scheduleData::removeInAuditory(string auditory)
 
 }
 
-bool scheduleData::editAllSchedule(int index, schedule sc)
+
+bool scheduleData::removeAllInAuditory(Auditory* auditory)
+{
+    bool removed = false;
+
+    auto itAuditory = auditoryVector.begin();
+    auto itSchedule = scheduleVector.begin();
+
+    for (int i = 0; i < auditoryVector.size(); i++)
+        if (auditoryVector[i] == *auditory) {
+            auditoryVector.erase(itAuditory + i);
+            removed = true;
+        }
+
+    if (removed) {
+        for (int i = 0; i < scheduleVector.size(); i++)
+            if (*(scheduleVector[i].getAuditory()) == *auditory)
+                scheduleVector.erase(itSchedule + i);
+
+        return true;
+    }
+
+    return false;
+}
+
+
+bool scheduleData::removeOneInGroup(Group* group) 
+{
+    bool removed = false;
+
+    auto itGroup = groupVector.begin();
+    auto itSchedule = scheduleVector.begin();
+
+    for (int i = 0; i < groupVector.size(); i++)
+        if (groupVector[i] == *group) {
+            groupVector.erase(itGroup + i);
+            return true;
+        }
+
+    return false;
+}
+
+
+bool scheduleData::removeOneInAuditory(Auditory* auditory) 
+{
+    auto itAuditory = auditoryVector.begin();
+    auto itSchedule = scheduleVector.begin();
+
+    for (int i = 0; i < auditoryVector.size(); i++)
+        if (auditoryVector[i] == *auditory) {
+            auditoryVector.erase(itAuditory + i);
+            return true;
+        }
+
+    return false;
+}
+
+
+bool scheduleData::editAllSchedule(int index, schedule* sc)
 {
 
     if (removeInSchedule(index)) {
-        scheduleVector[index].setID(sc.getID());
-        scheduleVector[index].setAuditory(sc.getAuditory());
-        scheduleVector[index].setDayOfWeek(sc.getDayOfWeek());
-        scheduleVector[index].setGroup(sc.getGroup().getGroupName());
-        scheduleVector[index].setTimeStart(sc.getTimeStart());
-        scheduleVector[index].setTimeEnd(sc.getTimeEnd());
-        scheduleVector[index].setWeekNumber(sc.getWeekNumber());
+        scheduleVector[index].setID(sc->getID());
+        scheduleVector[index].setAuditory(sc->getAuditory());
+        scheduleVector[index].setDayOfWeek(sc->getDayOfWeek());
+        scheduleVector[index].setGroup(sc->getGroup());
+        scheduleVector[index].setTime(sc->getTime());
+        scheduleVector[index].setWeekNumber(sc->getWeekNumber());
         return true;
     }
       
     return false;
 }
 
-bool scheduleData::editByDayInSchedule(int index, string day)
+
+bool scheduleData::editByDayInSchedule(int index, string* day)
 {
     scheduleVector[index].setDayOfWeek(day);
 
     return true;
 }
 
-bool scheduleData::editByTimeInSchedule(int index, string tStart, string tEnd)
+
+bool scheduleData::editByTimeInSchedule(int index, Time* time)
 {
-    scheduleVector[index].setTimeStart(tStart);
-    scheduleVector[index].setTimeEnd(tEnd);
+    scheduleVector[index].setTime(time);
 
     return true;
 }
 
-bool scheduleData::editByGroupInSchedule(int index, string group)
+
+bool scheduleData::editByGroupInSchedule(int index, Group* group)
 {
     scheduleVector[index].setGroup(group);
 
     return true;
 }
 
-bool scheduleData::editByAuditoryInSchedule(int index, string auditory)
+
+bool scheduleData::editByAuditoryInSchedule(int index, Auditory* auditory)
 {
     scheduleVector[index].setAuditory(auditory);
 
     return true;
 }
 
-bool scheduleData::editAuditory(string oldA, string newA)
+
+bool scheduleData::editAuditory(Auditory* oldAuditory, Auditory* newAuditory)
 {
-    bool changed = false;
 
     if (auditoryVector.size() == 0) {
         cout << "  Таблица Аудиторий пуста!!" << endl;
-        return changed;
+        return false;
     }
 
 
     for (int i = 0; i < auditoryVector.size(); i++) {
-        if (auditoryVector[i].getAuditoryName() == oldA) {
-            changed = true;
-            auditoryVector[i].setAuditoryName(newA);
-            break;
+        if (auditoryVector[i] == *oldAuditory) {
+            auditoryVector[i].setAuditoryName(newAuditory->getAuditoryName());
+            return true;
         }
     }
 
-    return true;
+    return false;
 }
 
-bool scheduleData::editGroup(string oldG, string newG)
-{
-    bool changed = false;
 
+bool scheduleData::editGroup(Group* oldGroup, Group* newGroup)
+{
     if (groupVector.size() == 0) {
         cout << "Таблица групп полностью пуста" << endl;
-        return changed;
+        return false;
     }
 
-    for (int i = 0; i < groupVector.size(); i++) {
-        if (groupVector[i].getGroupName() == oldG) {
-            changed = true;
-            groupVector[i].setGroupName(newG);
-            break;
+    for (int i = 0; i < groupVector.size(); i++)
+        if (groupVector[i] == *oldGroup) {
+            groupVector[i].setGroupName(newGroup->getGroupName());
+            return true;
         }
-    }
 
-    return changed;
+    return false;
 }
 
-void scheduleData::setScheduleVector(vector<schedule> scVector) { scheduleVector = scVector; }
-
-void scheduleData::setAuditoryVector(vector<Auditory> auVector) { auditoryVector = auVector; }
-
-void scheduleData::setGroupVector(vector<Group> grVector) { groupVector = grVector; }
 
 void scheduleData::showScheduleVector()
 {
 
-    for (int i = 0; i < this->scheduleVector.size(); i++)
-    {
+    if (!this->scheduleVector.size())
+        cout << "\n!- Таблица РАСПИСАНИЯ пуста!\n";
+    else {
+        for (int i = 0; i < this->scheduleVector.size(); i++)
+        {
 
-        cout << endl;
+            cout << endl;
+            cout << "  " << i + 1 << "." << endl;
+            cout << "    Номер недели: " << this->scheduleVector[i].getWeekNumber() << endl;
+            cout << "    День недели: " << this->scheduleVector[i].getDayOfWeek() << endl;
+            cout << this->scheduleVector[i].getTime() << endl;
+            cout << this->scheduleVector[i].getGroup() << endl;
+            cout << this->scheduleVector[i].getAuditory() << endl;
 
-        cout << "  " << i + 1 << "." << endl;
-        cout << "    Номер недели: " << this->scheduleVector[i].getWeekNumber() << endl;
-
-        cout << "    День недели: " << this->scheduleVector[i].getDayOfWeek() << endl;
-
-        cout << "    Время начала: " << this->scheduleVector[i].getTimeStart() << endl;
-
-        cout << "    Время окончания: " << this->scheduleVector[i].getTimeEnd() << endl;
-
-        cout << "    Название группы: " << this->scheduleVector[i].getGroup().getGroupName() << endl;
-
-        cout << "    Номер аудитории: " << this->scheduleVector[i].getAuditory().getAuditoryName() << endl;
-
-    }
-
-    if (this->scheduleVector.size()) {
-        cout << "\n!- Таблица расписания пуста!\n";
+        }
     }
 
     cout << endl;
 
 }
+
 
 void scheduleData::showAuditoryVector()
 {
+    if (!this->auditoryVector.size())
+        cout << "\n!- Таблица АУДИТОРИЙ пуста!\n";
+    else {
+        for (int i = 0; i < this->auditoryVector.size(); i++)
+        {
+            cout << endl;
 
-    for (int i = 0; i < this->auditoryVector.size(); i++)
-    {
+            cout << "  " << i + 1 << "." << this->auditoryVector[i].getAuditoryName() << endl;
 
-        cout << endl;
-
-        cout << "  " << i + 1 << "." << this->auditoryVector[i].getAuditoryName() << endl;
-
+        }
     }
-
-    if (this->auditoryVector.size()) {
-        cout << "\n!- Таблица групп пуста!\n";
-    }
-
     cout << endl;
-
 }
+
 
 void scheduleData::showGroupVector()
 {
-
-    for (int i = 0; i < this->groupVector.size(); i++)
-    {
-
-        cout << endl;
-
-        cout << "  " << i + 1 << "." << this->groupVector[i].getGroupName() << endl;
-
-    }
-
-    if (this->groupVector.size()) {
-        cout << "\n!- Таблица аудиторий пуста!\n";
-    }
-
+    if (!this->groupVector.size())
+        cout << "\n!- Таблица ГРУПП пуста!\n";
+    else {
+        for (int i = 0; i < this->groupVector.size(); i++)
+        {
+            cout << endl;
+            cout << "  " << i + 1 << "." << this->groupVector[i].getGroupName() << endl;
+        }
+    }   
     cout << endl;
+}
 
+
+vector<schedule> scheduleData::getScheduleVector() { return scheduleVector; }
+
+
+vector<Auditory> scheduleData::getAuditoryVector() { return auditoryVector; }
+
+
+vector<Group> scheduleData::getGroupVector() { return groupVector; }
+
+
+scheduleData::~scheduleData()
+{
+    this->scheduleVector.clear();
+    this->scheduleVector.shrink_to_fit();
+
+    this->auditoryVector.clear();
+    this->auditoryVector.shrink_to_fit();
+
+    this->groupVector.clear();
+    this->groupVector.shrink_to_fit();
 }

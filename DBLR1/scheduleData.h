@@ -17,36 +17,40 @@ private:
 
 public:
 
-	bool insertSchedule(schedule);
-	bool insertAuditory(string);
-	bool insertGroup(string);
+	~scheduleData();
 
-	bool isScheduleExist(schedule);
-	bool isAuditoryExist(string);
-	bool isGroupExist(string);
+	bool insertSchedule(schedule*);
+	bool insertAuditory(Auditory*);
+	bool insertGroup(Group*);
+	
+	bool isScheduleExist(schedule*);
+	bool isAuditoryExist(Auditory*);
+	bool isGroupExist(Group*);
 
 	bool removeInSchedule(int);
-	bool removeInGroup(string);
-	bool removeInAuditory(string);
+	bool removeOneInAuditory(Auditory*);
+	bool removeOneInGroup(Group*);
+	bool removeAllInGroup(Group*);
+	bool removeAllInAuditory(Auditory*);
 
-	bool editAllSchedule(int, schedule);
-	bool editByDayInSchedule(int, string);
-	bool editByTimeInSchedule(int, string, string);
-	bool editByGroupInSchedule(int, string);
-	bool editByAuditoryInSchedule(int, string);
-	bool editAuditory(string, string);
-	bool editGroup(string, string);
+	bool editAllSchedule(int, schedule*);
+	bool editByDayInSchedule(int, string*);
+	bool editByTimeInSchedule(int, Time*);
+	bool editByGroupInSchedule(int, Group*);
+	bool editByAuditoryInSchedule(int, Auditory*);
+	bool editAuditory(Auditory*, Auditory*);
+	bool editGroup(Group*, Group*);
 
 	void find(string);
 	void find(int, int);
 
-	void setScheduleVector(vector<schedule>);
-	void setAuditoryVector(vector<Auditory>);
-	void setGroupVector(vector<Group>);
-
 	void showScheduleVector();
 	void showAuditoryVector();
 	void showGroupVector();
+
+	vector<schedule> getScheduleVector();
+	vector<Auditory> getAuditoryVector();
+	vector<Group> getGroupVector();
 
 };
 

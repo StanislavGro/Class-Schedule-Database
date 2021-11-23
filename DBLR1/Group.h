@@ -10,21 +10,25 @@ class Group
 private:
 
 	int id;
-	string groupName;
+	string *groupName;
 
 public:
 
 	Group();
-	Group(string);
+	Group(string*);
+	Group(int, string*);
 	Group(const Group&);
+	~Group();
 
 	void setId(int);
-	void setGroupName(string);
+	void setGroupName(string*);
 
 	int getId();
-	string getGroupName();
+	string* getGroupName();
 
 	friend bool operator==(const Group&, const Group&);
+	friend ostream& operator<<(ostream& os, Group&);
+	friend istream& operator>>(istream& is, Group&);
 
 };
 

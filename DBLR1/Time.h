@@ -10,22 +10,26 @@ class Time
 private:
 
 	int id;
-	string timeStart;
-	string timeEnd;
+	string* timeStart;
+	string* timeEnd;
 
 public:
 
 	Time();
-	Time(string, string);
+	Time(string*, string*);
+	Time(int, string*, string*);
 	Time(const Time&);
+	~Time();
 
 	void setId(int);
-	void setTimeStart(string);
-	void setTimeEnd(string);
+	void setTimeStart(string*);
+	void setTimeEnd(string*);
 
 	int getId();
-	string getTimeStart();
-	string getTimeEnd();
+	string* getTimeStart();
+	string* getTimeEnd();
 
 	friend bool operator==(const Time&, const Time&);
+	friend ostream& operator<<(ostream& os, Time&);
+	friend istream& operator>>(istream& is, Time&);
 };

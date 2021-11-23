@@ -9,6 +9,7 @@
 #include <iomanip>
 #include "schedule.h"
 #include "DataMapper.h"
+#include "scheduleData.h"
 
 using namespace::std;
 
@@ -45,6 +46,7 @@ int main() {
 	system("color 0A");
 
     DataMapper dataMapper;
+	scheduleData scheduleDataVector;
 
 	console();
 
@@ -60,18 +62,49 @@ int main() {
 
 			schedule sch;
 
+			int schedId = 0;
+			int auditId = 0;
+			int groupId = 0;
+
 			system("cls");
 
 			cout << ">> Введите неделю, день, время начала, время конца, группу и аудиторию: " << endl;
 			cout << ">> ";
 			cin >> sch;
-			cout << "\n" <<sch;
+			cout << "\n" << sch;
 
-			if (dataMapper.insert(sch))
-				cout << "!- Вставка выполнена!" << endl;
-			else
-				cout << "!- Произошла ошибка!" << endl;
+			dataMapper.insert(&sch);
 
+			schedId = dataMapper.findSchedId(&sch);
+			auditId = dataMapper.findAuditId(sch.getAuditory());
+			groupId = dataMapper.findGroupId(sch.getGroup());
+
+			if (schedId > 0 && auditId > 0 && groupId > 0) {
+				cout << "!- Вставка в БД выполнена успешно!" << endl;
+				sch.setID(schedId);
+				if (scheduleDataVector.insertSchedule(new schedule(sch))) {
+					cout << "!- Вставка в ОП выполнена успешно!" << endl;
+					for (int i = 0; i < scheduleDataVector.getAuditoryVector().size(); i++)
+						if ((scheduleDataVector.getAuditoryVector())[i] == *(sch.getAuditory())) {
+							scheduleDataVector.removeOneInAuditory(sch.getAuditory());
+							break;
+						}
+					scheduleDataVector.insertAuditory(new Auditory(auditId, sch.getAuditory()->getAuditoryName()));
+					
+					for (int i = 0; i < scheduleDataVector.getGroupVector().size(); i++)
+						if ((scheduleDataVector.getGroupVector())[i] == *(sch.getGroup())) {
+							scheduleDataVector.removeOneInGroup(sch.getGroup());
+							break;
+						}
+					scheduleDataVector.insertGroup((new Group(groupId, sch.getGroup()->getGroupName())));
+
+				}
+				else
+					cout << "!- Ошибка вставки в ОП!" << endl;
+			}
+			else 
+				cout << "!- Произошла ошибка вставки в БД!" << endl;
+			
 			system("pause");
 
 			system("cls");
@@ -80,12 +113,19 @@ int main() {
 
 			break;
 		}
+		/*
 		case 2: {
 
-			int deleteNumber;
+			int deleteNumber, schedId = 0, auditId = 0, int groupId = 0;
 
 			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> deleteNumber;
+
+			dataMapper.remove(deleteNumber);
+
+			schedId = scheduleDataVector.removeInSchedule(deleteNumber);
+			auditId = scheduleDataVector.removeOneInAuditory()
+			groupId = dataMapper.findGroupId(sch.getGroup());
 
 			if (dataMapper.remove(deleteNumber))
 				cout << "!- Удаление выполнено!" << endl;
@@ -247,6 +287,7 @@ int main() {
 
 			break;
 		}
+		*/
 		case 12: {
 
 			dataMapper.printAll();

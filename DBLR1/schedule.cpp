@@ -5,80 +5,80 @@ using namespace::std;
 
 
 schedule::schedule(): 
-	id(-1), weekNumber(-1), dayOfWeek(""), timeStart(""), timeEnd(""), group(""), auditory()  {}
+	id(-1), weekNumber(NULL), dayOfWeek(NULL), time(NULL), group(NULL), auditory(NULL)  {}
 
 
-schedule::schedule(int ID, int weekNum, string dayOW, string timeStart, string timeEnd, string grName, string clNum) :
-	id(ID), weekNumber(weekNum), dayOfWeek(dayOW), timeStart(""), timeEnd(""), group(grName), auditory(clNum) {}
+schedule::schedule(int ID, int* weekNum, string* dayOW, Time* time, Group* grName, Auditory* clNum) :
+	id(ID), weekNumber(weekNum), dayOfWeek(dayOW), time(time), group(grName), auditory(clNum) {}
 
 
-schedule::schedule(int weekNum, string dayOW, string timeStart, string timeEnd, string grName, string clNum) :
-	schedule::schedule(-1, weekNum, dayOW, timeStart, timeEnd, grName, clNum) {}
+schedule::schedule(int* weekNum, string* dayOW, Time* time, Group* grName, Auditory* clNum) :
+	schedule::schedule(-1, weekNum, dayOW, time, grName, clNum) {}
 
 
 schedule::schedule(const schedule& sc) :
-	id(sc.id), weekNumber(sc.weekNumber), dayOfWeek(sc.dayOfWeek), timeStart(sc.timeStart), timeEnd(sc.timeEnd),
+	id(sc.id), weekNumber(sc.weekNumber), dayOfWeek(sc.dayOfWeek), time(sc.time),
 	group(sc.group), auditory(sc.auditory) {}
+
+
+schedule::~schedule()
+{
+	dayOfWeek->clear();
+	delete[] weekNumber;
+}
 
 
 void schedule::setID(int ID) { this->id = ID; }
 
 
-void schedule::setAuditory(Auditory clNum) { this->auditory = clNum; }
+void schedule::setAuditory(Auditory* clNum) { this->auditory = clNum; }
 
 
-void schedule::setWeekNumber(int weekNum) { this->weekNumber = weekNum; }
+void schedule::setWeekNumber(int* weekNum) { this->weekNumber = weekNum; }
 
 
-void schedule::setGroup(string grName) { this->group = grName; }
+void schedule::setGroup(Group* grName) { this->group = grName; }
 
 
-void schedule::setTimeStart(string timePStart) { this->timeStart = timeStart; }
+void schedule::setTime(Time* time) { this->time = time; }
 
 
-void schedule::setTimeEnd(string timeEnd) { this->timeStart = timeEnd; }
-
-
-void schedule::setDayOfWeek(string dayOW) { this->dayOfWeek = dayOW; }
+void schedule::setDayOfWeek(string* dayOW) { this->dayOfWeek = dayOW; }
 
 
 int schedule::getID() { return this->id; }
 
 
-Auditory schedule::getAuditory() { return this->auditory; }
+Auditory* schedule::getAuditory() { return this->auditory; }
 
 
-int schedule::getWeekNumber() {	return this->weekNumber; }
+int* schedule::getWeekNumber() { return this->weekNumber; }
 
 
-Group schedule::getGroup() { return this->group; }
+Group* schedule::getGroup() { return this->group; }
 
 
-string schedule::getTimeStart() { return this->timeStart; }
+Time* schedule::getTime() { return this->time; }
 
 
-string schedule::getTimeEnd() { return this->timeEnd; }
+string* schedule::getDayOfWeek() { return this->dayOfWeek; }
 
 
-string schedule::getDayOfWeek() { return this->dayOfWeek; }
-
-
-bool schedule::operator==(const schedule& sched)
+bool operator==(const schedule& sched1, const schedule& sched2)
 {
-	return this->auditory == sched.auditory && this->weekNumber == sched.weekNumber
-		&& this->dayOfWeek == sched.dayOfWeek && this->group == sched.group
-		&& this->timeStart == sched.timeStart && this->timeEnd == sched.timeEnd;
+	return *(sched1.auditory) == *(sched2.auditory) && *(sched1.weekNumber) == *(sched2.weekNumber)
+		&& *(sched1.dayOfWeek) == *(sched2.dayOfWeek) && *(sched1.group) == *(sched2.group)
+		&& *(sched1.time) == *(sched2.time);
 }
 
 
 ostream& operator<<(ostream& os, schedule& shed)
 {
-	os << "   Номер недели: "	   << shed.weekNumber			   << endl;
-	os << "   День недели: "	   << shed.dayOfWeek			   << endl;
-	os << "   Время начала: "	   << shed.timeStart			   << endl;
-	os << "   Время конца: "	   << shed.timeEnd				   << endl;
-	os << "   Название группы: "   << shed.group.getGroupName()		  << endl;
-	os << "   Номер аудитории: "   << shed.auditory.getAuditoryName() << endl;
+	os << "   Номер недели: "	<< *(shed.weekNumber)	<< endl;
+	os << "   День недели: "	<< *(shed.dayOfWeek)	<< endl;
+	os << *(shed.time);
+	os << *(shed.group);
+	os << *(shed.auditory);
 
 	os << endl;
 
@@ -86,22 +86,31 @@ ostream& operator<<(ostream& os, schedule& shed)
 }
 
 
-istream& operator>>(istream& is, schedule& shed) 
+istream& operator>>(istream& is, schedule& sched) 
 {
-
+	int week;
+	string day;
+	string timeStart;
+	string timeEnd;
 	string auditory;
 	string group;
 
 	//is >> shed.id;
-	is >> shed.weekNumber;
-	is >> shed.dayOfWeek;
-	is >> shed.timeStart;
-	is >> shed.timeEnd;
+	is >> week;
+	is >> day;
+	is >> timeStart;
+	is >> timeEnd;
 	is >> group;
 	is >> auditory;
 
-	shed.group.setGroupName(group);
-	shed.auditory.setAuditoryName(auditory);
+
+	//sched = *(new schedule(&week, &day, new Time(&timeStart, &timeEnd), new Group(&group), new Auditory(&auditory)));
+
+	sched.setWeekNumber(new int(week));
+	sched.setDayOfWeek(new string(day));
+	sched.setTime(new Time(new string(timeStart), new string(timeEnd)));
+	sched.setGroup(new Group(new string(group)));
+	sched.setAuditory(new Auditory(new string(auditory)));
 
 	return is;
 }
@@ -111,12 +120,11 @@ void schedule::print()
 {
 	cout << this->id << "." << endl;
 
-	cout << "Номер недели: "	<< this->weekNumber					 <<endl;
-	cout << "День недели: "		<< this->dayOfWeek					 <<endl;
-	cout << "Время начала: "	<< this->timeStart					 <<endl;
-	cout << "Время конца: "		<< this->timeEnd					 <<endl;
-	cout << "Название группы: " << this->group.getGroupName()		 <<endl;
-	cout << "Номер аудитории: " << this->auditory.getAuditoryName()	 <<endl;
+	cout << "Номер недели: "	<< *(this->weekNumber)		<<endl;
+	cout << "День недели: "		<< *(this->dayOfWeek)		<<endl;
+	cout << *(this->time)		<<endl;
+	cout << *(this->group)		<<endl;
+	cout << *(this->auditory)	<<endl;
 
 	cout << endl;
 }

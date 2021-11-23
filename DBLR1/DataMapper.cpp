@@ -1,6 +1,6 @@
 #include "DataMapper.h"
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 #include <sstream>
 
 using namespace::std;
@@ -10,12 +10,12 @@ DataMapper::DataMapper() {
     if (connectToDB() == 1)
         creatingTables();
     else
-        cout << "!- Какая-то неизвестная ошибка!" << endl;
+        cout << "!- Неизвестная ошибка!" << endl;
 
-}
+} 
 
 
-int DataMapper::connectToDB() 
+int DataMapper::connectToDB()
 {
     retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
     if (retcode < 0)
@@ -44,11 +44,137 @@ int DataMapper::connectToDB()
 }
 
 
-bool DataMapper::insert(schedule sched)
+void DataMapper::creatingTables()
 {
 
-    scheduleVectorMapper.getSchedule().push_back(sched);
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists auditory_table("
+        "id serial primary key,"
+        "auditory varchar(20) unique"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists groupp_table("
+        "id serial primary key,"
+        "groupp varchar(20) unique"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists day_table("
+        "id serial primary key,"
+        "day varchar(20) unique"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists time_table("
+        "id serial primary key,"
+        "time_start time,"
+        "time_end time,"
+        "unique(time_start, time_end)"
+        "); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    retcode = SQLPrepare(hstmt,
+        (SQLWCHAR*)L"create table if not exists schedule ("
+        "id serial primary key,"
+        "week int check (week >= 1 and week <= 18),"
+        "day int references day_table(id) on update cascade on delete cascade,"
+        "time int references time_table(id) on update cascade on delete cascade,"
+        "groupp int references groupp_table(id) on update cascade on delete cascade,"
+        "auditory int references auditory_table(id) on update cascade on delete cascade,"
+        "unique(week, day, time, auditory)); ", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Понедельник')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Вторник')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Среда')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Четверг')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Пятница')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Суббота')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('8:30', '10:00')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('10:15', '11:45')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('12:00', '13:30')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('14:00', '15:30')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('15:45', '17:15')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('17:30', '19:00')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('19:15', '20:45')", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+}
+
+
+bool DataMapper::insert(schedule* sched)
+{
 
     int id_auditory = 0;
     int id_group = 0;
@@ -56,18 +182,18 @@ bool DataMapper::insert(schedule sched)
     int id_time = 0;
 
    
-    SQLINTEGER week = sched.getWeekNumber();
+    SQLINTEGER week = *(sched->getWeekNumber());
     SQLWCHAR day[20];
     SQLWCHAR timeStart[20];
     SQLWCHAR timeEnd[20];
     SQLWCHAR group[20];
     SQLWCHAR auditory[20];
 
-    strcpy_s((char*)group, strlen(sched.getGroupName().c_str()) + 1, sched.getGroupName().c_str());
-    strcpy_s((char*)timeStart, strlen(sched.getTimeStart().c_str()) + 1, sched.getTimeStart().c_str());
-    strcpy_s((char*)timeEnd, strlen(sched.getTimeEnd().c_str()) + 1, sched.getTimeEnd().c_str());
-    strcpy_s((char*)day, strlen(sched.getDayOfWeek().c_str()) + 1, sched.getDayOfWeek().c_str());
-    strcpy_s((char*)auditory, strlen(sched.getAuditory().getAuditoryName().c_str()) + 1, sched.getAuditory().getAuditoryName().c_str());
+    strcpy_s((char*)group, strlen(sched->getGroup()->getGroupName()->c_str()) + 1, sched->getGroup()->getGroupName()->c_str());
+    strcpy_s((char*)timeStart, strlen(sched->getTime()->getTimeStart()->c_str()) + 1, sched->getTime()->getTimeStart()->c_str());
+    strcpy_s((char*)timeEnd, strlen(sched->getTime()->getTimeEnd()->c_str()) + 1, sched->getTime()->getTimeEnd()->c_str());
+    strcpy_s((char*)day, strlen(sched->getDayOfWeek()->c_str()) + 1, sched->getDayOfWeek()->c_str());
+    strcpy_s((char*)auditory, strlen(sched->getAuditory()->getAuditoryName()->c_str()) + 1, sched->getAuditory()->getAuditoryName()->c_str());
 
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
@@ -156,10 +282,172 @@ bool DataMapper::insert(schedule sched)
 }
 
 
+int DataMapper::findSchedId(schedule* sched)
+{
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    int id = 0;
+    int id_time = 0;
+
+    SQLINTEGER week = *(sched->getWeekNumber());
+    SQLWCHAR day[20];
+    SQLWCHAR timeStart[20];
+    SQLWCHAR timeEnd[20];
+    SQLWCHAR group[20];
+    SQLWCHAR auditory[20];
+
+    strcpy_s((char*)group, strlen(sched->getGroup()->getGroupName()->c_str()) + 1, sched->getGroup()->getGroupName()->c_str());
+    strcpy_s((char*)timeStart, strlen(sched->getTime()->getTimeStart()->c_str()) + 1, sched->getTime()->getTimeStart()->c_str());
+    strcpy_s((char*)timeEnd, strlen(sched->getTime()->getTimeEnd()->c_str()) + 1, sched->getTime()->getTimeEnd()->c_str());
+    strcpy_s((char*)day, strlen(sched->getDayOfWeek()->c_str()) + 1, sched->getDayOfWeek()->c_str());
+    strcpy_s((char*)auditory, strlen(sched->getAuditory()->getAuditoryName()->c_str()) + 1, sched->getAuditory()->getAuditoryName()->c_str());
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, timeStart, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, timeEnd, 255, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from time_table where time_start = ? and time_end = ?", SQL_NTS);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_time, sizeof(id_time), NULL);
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "!- Ошибка!";
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0,   0, &week, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR,  SQL_VARCHAR, 255, 0, day, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &id_time, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_CHAR,  SQL_VARCHAR, 255, 0, group, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_CHAR,  SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+
+    wstring output = L"select sc.*, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
+        "from schedule as sc "
+        "join day_table as d on d.id = sc.day "
+        "join time_table as ti on ti.id = sc.time "
+        "join groupp_table as gr on gr.id = sc.groupp "
+        "join auditory_table as au on au.id = sc.auditory "
+        "where sc.week = ? and d.day = ? and sc.time = ? and gr.groupp=? and au.auditory = ?";
+
+    retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
+
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+        retcode = SQLFetch(hstmt);
+
+        retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+        retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+        retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            return 0;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            return id;
+        else 
+            return -1;
+
+        cout << endl;
+
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return -1;
+
+}
+
+
+int DataMapper::findAuditId(Auditory* audit)
+{
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    int id = 0;
+    SQLWCHAR auditory[20];
+
+    strcpy_s((char*)auditory, strlen(audit->getAuditoryName()->c_str()) + 1, audit->getAuditoryName()->c_str());
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from auditory_table where auditory = ?", SQL_NTS);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+        retcode = SQLFetch(hstmt);
+
+        retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+        retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+        retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            return 0;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            return id;
+        else
+            return -1;
+
+        cout << endl;
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return -1;
+
+}
+
+
+int DataMapper::findGroupId(Group* Group)
+{
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    int id = 0;
+    SQLWCHAR group[20];
+
+    strcpy_s((char*)group, strlen(Group->getGroupName()->c_str()) + 1, Group->getGroupName()->c_str());
+    
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from groupp_table where groupp = ?", SQL_NTS);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+        retcode = SQLFetch(hstmt);
+
+        retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+        retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+        retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            return 0;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            return id;
+        else
+            return -1;
+
+        cout << endl;
+    }
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return -1;
+}
+
+
 bool DataMapper::edit(int number, schedule sched)
 {
     remove(number);
-    insert(sched);
+    insert(&sched);
 
     return true;
 }
@@ -980,138 +1268,6 @@ void DataMapper::find(int hoursNumber, int weekNumber)
 }
 
 
-void DataMapper::creatingTables()
-{
-
-    retcode = SQLPrepare(hstmt,
-        (SQLWCHAR*)L"create table if not exists auditory_table("
-        "id serial primary key,"
-        "auditory varchar(20) unique"
-        "); ", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-
-    retcode = SQLPrepare(hstmt,
-        (SQLWCHAR*)L"create table if not exists groupp_table("
-        "id serial primary key,"
-        "groupp varchar(20) unique"
-        "); ", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-
-    retcode = SQLPrepare(hstmt,
-        (SQLWCHAR*)L"create table if not exists day_table("
-        "id serial primary key,"
-        "day varchar(20) unique"
-        "); ", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-
-    retcode = SQLPrepare(hstmt,
-        (SQLWCHAR*)L"create table if not exists time_table("
-        "id serial primary key,"
-        "time_start time,"
-        "time_end time,"
-        "unique(time_start, time_end)"
-        "); ", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-
-    retcode = SQLPrepare(hstmt,
-        (SQLWCHAR*)L"create table if not exists schedule ("
-        "id serial primary key,"
-        "week int check (week >= 1 and week <= 18),"
-        "day int references day_table(id) on update cascade on delete cascade,"
-        "time int references time_table(id) on update cascade on delete cascade,"
-        "groupp int references groupp_table(id) on update cascade on delete cascade,"
-        "auditory int references auditory_table(id) on update cascade on delete cascade,"
-        "unique(week, day, time, auditory)); ", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Понедельник')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Вторник')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Среда')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Четверг')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Пятница')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO day_table(day) VALUES ('Суббота')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('8:30', '10:00')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('10:15', '11:45')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('12:00', '13:30')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('14:00', '15:30')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('15:45', '17:15')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('17:30', '19:00')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO time_table(time_start,  time_end) VALUES ('19:15', '20:45')", SQL_NTS);
-    retcode = SQLExecute(hstmt);
-    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-
-}
-
-
-//scheduleVector DataMapper::getSchedule() { return scheduleVectorMapper; }
-
-
 void DataMapper::printAll()
 {
 
@@ -1136,9 +1292,9 @@ void DataMapper::printAll()
         "join day_table as d on d.id = sc.day "
         "join time_table as ti on ti.id = sc.time "
         "join groupp_table as gr on gr.id = sc.groupp "
-        "join auditory_table as au on au.id = sc.auditory "
+        "join auditory_table as au on au.id = sc.auditory ";
         //"order by (sc.week, d.day, ti.time_start, ti.time_end, au.auditory)";
-        "order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
+        //"order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
 
     //wcout << output << endl;
 
@@ -1236,9 +1392,9 @@ int DataMapper::disconnectFromDB()
 DataMapper::~DataMapper() 
 { 
     system("color 04");
-    cout << ">> Ну пока)" << endl; 
+    cout << endl;
+    cout << ">> GOOD BYE!" << endl; 
 
-    scheduleVectorMapper.getSchedule().clear();
-    scheduleVectorMapper.getSchedule().shrink_to_fit();
+    disconnectFromDB();
 
 }
