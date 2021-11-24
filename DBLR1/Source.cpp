@@ -17,6 +17,13 @@ void GetConsBuff(int&, int&);
 
 void CenterString(string&, const size_t&);
 
+
+//доделать функции с 6-9
+//проверить их
+//добавить все 4 файнда
+//добавить еще пару функций на каждый класс
+
+
 void console() {
 
 	string mainStr = "***Расписание занятий!***";
@@ -186,7 +193,7 @@ int main() {
 			cout << ">> Введите новый день недели: ";
 			cin >> dayStr;
 
-			if (dataMapper.editByDay(editNumber, dayStr))
+			if (dataMapper.editByDay(&editNumber, &dayStr))
 				cout << "!- Запись изменена!" << endl;
 			else
 				cout << "!- Произошла ошибка!" << endl;
@@ -207,7 +214,7 @@ int main() {
 			cout << ">> Введите время окончания: ";
 			cin >> dayEndStr;
 
-			if (dataMapper.editByTime(editNumber, dayStartStr, dayEndStr))
+			if (dataMapper.editByTime(&editNumber, &dayStartStr, &dayEndStr))
 				cout << "!- Запись изменена!" << endl;
 			else
 				cout << "!- Произошла ошибка!" << endl;
@@ -225,7 +232,7 @@ int main() {
 			cout << ">> Введите новую группу: ";
 			cin >> groupStr;
 
-			if (dataMapper.editByGroup(editNumber, groupStr))
+			if (dataMapper.editByGroup(&editNumber, &groupStr))
 				cout << "!- Запись изменена!" << endl;
 			else
 				cout << "!- Произошла ошибка!" << endl;
@@ -243,7 +250,7 @@ int main() {
 			cout << ">> Введите новую аудиторию: ";
 			cin >> auditoryStr;
 
-			if (dataMapper.editByAuditory(editNumber, auditoryStr))
+			if (dataMapper.editByAuditory(&editNumber, &auditoryStr))
 				cout << "!- Запись изменена!" << endl;
 			else
 				cout << "!- Произошла ошибка!" << endl;
