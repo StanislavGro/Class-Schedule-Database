@@ -10,8 +10,8 @@ Time::Time(const Time& time): id(time.id), timeStart(new string(*(time.timeStart
 
 Time::~Time()
 {
-	timeStart->clear();
-	timeEnd->clear();
+	//timeStart->clear();
+	//timeEnd->clear();
 }
 
 void Time::setId(int id) { this->id = id; }

@@ -12,7 +12,7 @@ Auditory::Auditory(const Auditory &audit): id(audit.id), auditoryName(new string
 
 Auditory::~Auditory()
 {
-	auditoryName->clear();
+	//auditoryName->clear();
 }
 
 void Auditory::setId(int id) { this->id = id; }

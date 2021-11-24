@@ -9,7 +9,7 @@ schedule::schedule():
 
 
 schedule::schedule(int ID, int* weekNum, string* dayOW, Time* time, Group* grName, Auditory* clNum) :
-	id(ID), weekNumber(weekNum), dayOfWeek(dayOW), time(time), group(grName), auditory(clNum) {}
+	id(ID), weekNumber(new int(*weekNum)), dayOfWeek(new string(*dayOW)), time(new Time(*time)), group(new Group(*grName)), auditory(new Auditory(*clNum)) {}
 
 
 schedule::schedule(int* weekNum, string* dayOW, Time* time, Group* grName, Auditory* clNum) :
@@ -17,14 +17,14 @@ schedule::schedule(int* weekNum, string* dayOW, Time* time, Group* grName, Audit
 
 
 schedule::schedule(const schedule& sc) :
-	id(sc.id), weekNumber(sc.weekNumber), dayOfWeek(sc.dayOfWeek), time(sc.time),
-	group(sc.group), auditory(sc.auditory) {}
+	id(sc.id), weekNumber(new int(*sc.weekNumber)), dayOfWeek(new string(*sc.dayOfWeek)), time(new Time(*sc.time)), group(new Group(*sc.group)), auditory(new Auditory(*sc.auditory)) {}
 
 
 schedule::~schedule()
 {
-	dayOfWeek->clear();
-	delete[] weekNumber;
+	//dayOfWeek->clear();
+	/*if(*weekNumber>0)
+		delete[] weekNumber;*/
 }
 
 

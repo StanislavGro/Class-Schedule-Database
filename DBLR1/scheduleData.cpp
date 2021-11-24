@@ -9,8 +9,8 @@ bool scheduleData::insertSchedule(schedule* sch)
 { 
 
     if (!isScheduleExist(sch)) {
-        this->scheduleVector.push_back(*sch);
-        return insertAuditory(new Auditory(sch->getAuditory()->getAuditoryName())) && insertGroup(new Group(sch->getGroup()->getGroupName()));
+        this->scheduleVector.push_back(*(new schedule(*sch)));
+        return insertAuditory(sch->getAuditory()) && insertGroup(sch->getGroup());
     }
 
     return false; 
@@ -19,9 +19,13 @@ bool scheduleData::insertSchedule(schedule* sch)
 
 bool scheduleData::isScheduleExist(schedule* sch) 
 {
-    for (schedule sched : scheduleVector)
-        if (sched == *sch)
+    for(int i = 0; i < scheduleVector.size(); i++)
+        if (scheduleVector[i] == *sch)
             return true;
+
+    /*for (schedule sched : scheduleVector)
+        if (sched == *sch)
+            return true;*/
 
     return false;
 }
@@ -30,7 +34,7 @@ bool scheduleData::isScheduleExist(schedule* sch)
 bool scheduleData::insertAuditory(Auditory* auditory) {
 
     if (!isAuditoryExist(auditory)) {
-        this->auditoryVector.push_back(*auditory);
+        this->auditoryVector.push_back(*(new Auditory(*auditory)));
         return true;
     }
 
@@ -41,9 +45,13 @@ bool scheduleData::insertAuditory(Auditory* auditory) {
 
 bool scheduleData::isAuditoryExist(Auditory* auditory)
 {
-    for (Auditory au : auditoryVector)
-        if (au == *auditory)
+    for (int i = 0; i < auditoryVector.size(); i++)
+        if (auditoryVector[i] == *auditory)
             return true;
+
+    /*for (Auditory au : auditoryVector)
+        if (au == *auditory)
+            return true;*/
 
     return false;
 }
@@ -52,7 +60,7 @@ bool scheduleData::isAuditoryExist(Auditory* auditory)
 bool scheduleData::insertGroup(Group* group) {	
     
     if (!isGroupExist(group)) {
-        this->groupVector.push_back(*group);
+        this->groupVector.push_back(*(new Group(*group)));
         return true;
     }
 
@@ -62,9 +70,14 @@ bool scheduleData::insertGroup(Group* group) {
 
 bool scheduleData::isGroupExist(Group* group)
 {
-    for (Group gr : groupVector)
-        if (gr == *group)
+
+    for (int i = 0; i < groupVector.size(); i++)
+        if (groupVector[i] == *group)
             return true;
+
+    /*for (Group gr : groupVector)
+        if (gr == *group)
+            return true;*/
 
     return false;
 }
@@ -72,7 +85,16 @@ bool scheduleData::isGroupExist(Group* group)
 
 bool scheduleData::removeInSchedule(int index)
 {
-    scheduleVector.erase(scheduleVector.begin()+index);
+
+    auto scheduleIt = scheduleVector.begin();
+
+    for (int i = 0; i < scheduleVector.size(); i++, scheduleIt++) {
+        if (scheduleVector[i].getID() == index) {
+            scheduleVector.erase(scheduleIt);
+            break;
+        }
+    }
+
 
     return true;
 }
@@ -82,20 +104,28 @@ bool scheduleData::removeAllInGroup(Group* group)
 {
 
     bool removed = false;
-
-    auto itGroup = groupVector.begin();
     auto itSchedule = scheduleVector.begin();
+    auto itGroup = groupVector.begin();
 
-    for (int i = 0; i < groupVector.size(); i++)
+    /*auto it = std::find(groupVector.begin(), groupVector.end(), group->getGroupName());
+    if (it != groupVector.end())
+        groupVector.erase(it);*/
+
+    for (int i = 0; i < groupVector.size(); i++, itGroup++)
         if (groupVector[i] == *group) {
-            groupVector.erase(itGroup+i);
+            groupVector.erase(itGroup);
             removed = true;
+            break;
         }
 
     if (removed) {
-        for (int i = 0; i < scheduleVector.size(); i++)
-            if (*(scheduleVector[i].getGroup()) == *group)
+        for (int i = 0; i < scheduleVector.size(); i++) {
+            if (*(scheduleVector[i].getGroup()) == *group) {
                 scheduleVector.erase(itSchedule + i);
+                itSchedule = scheduleVector.begin();
+                i--;
+            }
+        }
         return true;
     }
 
@@ -111,16 +141,20 @@ bool scheduleData::removeAllInAuditory(Auditory* auditory)
     auto itAuditory = auditoryVector.begin();
     auto itSchedule = scheduleVector.begin();
 
-    for (int i = 0; i < auditoryVector.size(); i++)
+    for (int i = 0; i < auditoryVector.size(); i++, itAuditory++)
         if (auditoryVector[i] == *auditory) {
-            auditoryVector.erase(itAuditory + i);
+            auditoryVector.erase(itAuditory);
             removed = true;
+            break;
         }
 
     if (removed) {
         for (int i = 0; i < scheduleVector.size(); i++)
-            if (*(scheduleVector[i].getAuditory()) == *auditory)
+            if (*(scheduleVector[i].getAuditory()) == *auditory) {
                 scheduleVector.erase(itSchedule + i);
+                itSchedule = scheduleVector.begin();
+                i--;
+            }
 
         return true;
     }
@@ -165,12 +199,7 @@ bool scheduleData::editAllSchedule(int index, schedule* sc)
 {
 
     if (removeInSchedule(index)) {
-        scheduleVector[index].setID(sc->getID());
-        scheduleVector[index].setAuditory(sc->getAuditory());
-        scheduleVector[index].setDayOfWeek(sc->getDayOfWeek());
-        scheduleVector[index].setGroup(sc->getGroup());
-        scheduleVector[index].setTime(sc->getTime());
-        scheduleVector[index].setWeekNumber(sc->getWeekNumber());
+        scheduleVector.push_back((*(new schedule(*sc))));
         return true;
     }
       

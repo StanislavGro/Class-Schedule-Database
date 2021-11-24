@@ -165,16 +165,16 @@ int main() {
 			cin >> sch;
 			scheduleDataVector.editAllSchedule(editNumber, &sch);
 
-			if (dataMapper.edit(&editNumber, &sch)) {
+			/*if (dataMapper.edit(&editNumber, &sch)) {
 				scheduleDataVector.editAllSchedule(editNumber, &sch);
 				cout << "!- Запись изменена!" << endl;
 			}
 			else
-				cout << "!- Произошла ошибка!" << endl;
+				cout << "!- Произошла ошибка!" << endl;*/
 
 			break;
 		}
-			  
+			  /*
 		case 6: {
 
 			string dayStr;
@@ -193,7 +193,6 @@ int main() {
 
 			break;
 		}
-			  
 		case 7: {
 
 			string dayStartStr, dayEndStr;
@@ -250,7 +249,6 @@ int main() {
 
 			break;
 		}
-		/*
 		case 10: {
 
 			string hours;

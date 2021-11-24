@@ -12,7 +12,7 @@ Group::Group(const Group& gr): id(gr.id), groupName(new string(*(gr.groupName)))
 
 Group::~Group()
 {
-	groupName->clear();
+	//groupName->clear();
 }
 
 void Group::setId(int id) { this->id = id; }

@@ -41,10 +41,10 @@ public:
     int findGroupId(Group*);
 
     bool edit(int*, schedule*);
-    bool editByDay(int*, string*);
-    bool editByTime(int*, string*, string*);
-    bool editByGroup(int*, string*);
-    bool editByAuditory(int*, string*);
+    bool editByDay(int, string);
+    bool editByTime(int, string, string);
+    bool editByGroup(int, string);
+    bool editByAuditory(int, string);
 
     bool remove(int*);
     bool removeByGroup(string*);

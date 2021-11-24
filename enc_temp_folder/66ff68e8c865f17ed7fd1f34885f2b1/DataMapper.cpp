@@ -570,11 +570,11 @@ bool DataMapper::edit(int* number, schedule* sched)
 }
 
 
-bool DataMapper::editByDay(int* number, string* dayStr)
+bool DataMapper::editByDay(int number, string dayStr)
 {
     int id_day = 0;
     SQLWCHAR day[20];
-    strcpy_s((char*)day, strlen(dayStr->c_str()) + 1, dayStr->c_str());
+    strcpy_s((char*)day, strlen(dayStr.c_str()) + 1, dayStr.c_str());
 
     int id = 0;
     vector<int> idVector;
@@ -606,7 +606,7 @@ bool DataMapper::editByDay(int* number, string* dayStr)
     retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
     retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
-    SQLINTEGER removeNumber = idVector[*number - 1];
+    SQLINTEGER removeNumber = idVector[number - 1];
     idVector.clear();
     idVector.shrink_to_fit();
 
@@ -637,14 +637,14 @@ bool DataMapper::editByDay(int* number, string* dayStr)
 }
 
 
-bool DataMapper::editByTime(int* number, string* timeStartStr, string* timeEndStr)
+bool DataMapper::editByTime(int number, string timeStartStr, string timeEndStr)
 {
 
     int id_time = 0;
     SQLWCHAR time_start[20];
     SQLWCHAR time_end[20];
-    strcpy_s((char*)time_start, strlen(timeStartStr->c_str()) + 1, timeStartStr->c_str());
-    strcpy_s((char*)time_end, strlen(timeEndStr->c_str()) + 1, timeEndStr->c_str());
+    strcpy_s((char*)time_start, strlen(timeStartStr.c_str()) + 1, timeStartStr.c_str());
+    strcpy_s((char*)time_end, strlen(timeEndStr.c_str()) + 1, timeEndStr.c_str());
 
 
     int id = 0;
@@ -677,7 +677,7 @@ bool DataMapper::editByTime(int* number, string* timeStartStr, string* timeEndSt
     retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
     retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
-    SQLINTEGER removeNumber = idVector[*number - 1];
+    SQLINTEGER removeNumber = idVector[number - 1];
     idVector.clear();
     idVector.shrink_to_fit();
 
@@ -708,12 +708,12 @@ bool DataMapper::editByTime(int* number, string* timeStartStr, string* timeEndSt
 }
 
 
-bool DataMapper::editByGroup(int* number, string* groupStr)
+bool DataMapper::editByGroup(int number, string groupStr)
 {
 
     int id_group = 0;
     SQLWCHAR group[20];
-    strcpy_s((char*)group, strlen(groupStr->c_str()) + 1, groupStr->c_str());
+    strcpy_s((char*)group, strlen(groupStr.c_str()) + 1, groupStr.c_str());
 
 
     int id = 0;
@@ -747,7 +747,7 @@ bool DataMapper::editByGroup(int* number, string* groupStr)
     retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
     retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
-    SQLINTEGER removeNumber = idVector[*number - 1];
+    SQLINTEGER removeNumber = idVector[number - 1];
     idVector.clear();
     idVector.shrink_to_fit();
 
@@ -787,12 +787,12 @@ bool DataMapper::editByGroup(int* number, string* groupStr)
 }
 
 
-bool DataMapper::editByAuditory(int* number, string* auditoryStr)
+bool DataMapper::editByAuditory(int number, string auditoryStr)
 {
 
     int id_auditory = 0;
     SQLWCHAR auditory[20];
-    strcpy_s((char*)auditory, strlen(auditoryStr->c_str()) + 1, auditoryStr->c_str());
+    strcpy_s((char*)auditory, strlen(auditoryStr.c_str()) + 1, auditoryStr.c_str());
 
 
     int id = 0;
@@ -826,7 +826,7 @@ bool DataMapper::editByAuditory(int* number, string* auditoryStr)
     retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
     retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
-    SQLINTEGER removeNumber = idVector[*number - 1];
+    SQLINTEGER removeNumber = idVector[number - 1];
     idVector.clear();
     idVector.shrink_to_fit();
 
