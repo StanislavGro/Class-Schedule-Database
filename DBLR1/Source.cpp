@@ -18,13 +18,9 @@ void GetConsBuff(int&, int&);
 void CenterString(string&, const size_t&);
 
 
-//доделать функции с 6-9
-//проверить их
-//добавить все 4 файнда
-//добавить еще пару функций на каждый класс
-
-
 void console() {
+
+	cout << endl;
 
 	string mainStr = "***Расписание занятий!***";
 	CenterString(mainStr, 25u);
@@ -47,6 +43,9 @@ void console() {
 }
 
 int main() {
+
+	//1 Понедельник 8:30 10:00 АВТ-815 3-2
+
 
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
@@ -170,7 +169,7 @@ int main() {
 			cout << ">> Введите новые: неделю, день, время начала, время окончания, группу и аудиторию:" << endl;
 			cout << ">> ";
 			cin >> sch;
-			scheduleDataVector.editAllSchedule(editNumber, &sch);
+			//scheduleDataVector.editAllSchedule(editNumber, &sch);
 
 			if (dataMapper.edit(&editNumber, &sch)) {
 				scheduleDataVector.editAllSchedule(editNumber, &sch);
@@ -193,8 +192,11 @@ int main() {
 			cout << ">> Введите новый день недели: ";
 			cin >> dayStr;
 
-			if (dataMapper.editByDay(&editNumber, &dayStr))
+
+			if (dataMapper.editByDay(&editNumber, &dayStr)) {
+				scheduleDataVector.editByAuditoryInSchedule(editNumber, new Auditory(&dayStr));
 				cout << "!- Запись изменена!" << endl;
+			}
 			else
 				cout << "!- Произошла ошибка!" << endl;
 
@@ -203,19 +205,22 @@ int main() {
 			  
 		case 7: {
 
-			string dayStartStr, dayEndStr;
+			string timeStartStr, timeEndStr;
 			int editNumber;
 
 			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
 
 			cout << ">> Введите время начала: ";
-			cin >> dayStartStr;
+			cin >> timeStartStr;
 			cout << ">> Введите время окончания: ";
-			cin >> dayEndStr;
+			cin >> timeEndStr;
 
-			if (dataMapper.editByTime(&editNumber, &dayStartStr, &dayEndStr))
+
+			if (dataMapper.editByTime(&editNumber, &timeStartStr, &timeEndStr)) {
+				scheduleDataVector.editByTimeInSchedule(editNumber, new Time(&timeStartStr, &timeEndStr));
 				cout << "!- Запись изменена!" << endl;
+			}
 			else
 				cout << "!- Произошла ошибка!" << endl;
 
@@ -224,7 +229,7 @@ int main() {
 		case 8: {
 
 			string groupStr;
-			int editNumber;
+			int editNumber, groupID;
 
 			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
@@ -232,17 +237,30 @@ int main() {
 			cout << ">> Введите новую группу: ";
 			cin >> groupStr;
 
-			if (dataMapper.editByGroup(&editNumber, &groupStr))
+			Group *newGroup = new Group(&groupStr);
+
+			if (dataMapper.editByGroup(&editNumber, &groupStr)) {
+
+				groupID = dataMapper.findGroupId(newGroup);
+				if (groupID > 0) {
+					newGroup->setId(groupID);
+					//scheduleDataVector.getGroupVector()[-1].setId(groupID);
+					scheduleDataVector.editByGroupInSchedule(editNumber, newGroup);
+					scheduleDataVector.insertGroup(newGroup);
+				}
+
 				cout << "!- Запись изменена!" << endl;
+			}
 			else
 				cout << "!- Произошла ошибка!" << endl;
+		
 
 			break;
 		}
 		case 9: {
 
 			string auditoryStr;
-			int editNumber;
+			int editNumber, auditoryID;
 
 			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
@@ -250,14 +268,24 @@ int main() {
 			cout << ">> Введите новую аудиторию: ";
 			cin >> auditoryStr;
 
-			if (dataMapper.editByAuditory(&editNumber, &auditoryStr))
+			Auditory* newAuditory = new Auditory(&auditoryStr);
+
+			if (dataMapper.editByAuditory(&editNumber, &auditoryStr)) {
+
+				auditoryID = dataMapper.findAuditId(newAuditory);
+				if (auditoryID > 0) {
+					newAuditory->setId(auditoryID);
+					scheduleDataVector.editByAuditoryInSchedule(editNumber, newAuditory);
+					scheduleDataVector.insertAuditory(newAuditory);
+				}
+
 				cout << "!- Запись изменена!" << endl;
+			}
 			else
 				cout << "!- Произошла ошибка!" << endl;
 
 			break;
 		}
-		/*
 		case 10: {
 
 			string hours;
@@ -268,7 +296,8 @@ int main() {
 			cin.get();
 			getline(cin, hours);
 
-			dataMapper.find(hours);
+			//dataMapper.find(hours);
+			scheduleDataVector.find(&hours);
 
 			break;
 
@@ -283,11 +312,12 @@ int main() {
 			cout << ">> Введите номер недели: ";
 			cin >> numberWeek;
 
-			dataMapper.find(numberHours, numberWeek);
+			//dataMapper.find(numberHours, numberWeek);
+			scheduleDataVector.find(&numberHours,&numberWeek);
+
 
 			break;
 		}
-		*/
 		case 12: {
 
 			dataMapper.printAll();

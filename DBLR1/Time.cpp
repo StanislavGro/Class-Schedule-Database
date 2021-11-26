@@ -8,12 +8,6 @@ Time::Time(int ID, string* tStart, string* tEnd): id(ID), timeStart(new string(*
 
 Time::Time(const Time& time): id(time.id), timeStart(new string(*(time.timeStart))), timeEnd(new string(*(time.timeEnd))) {}
 
-Time::~Time()
-{
-	//timeStart->clear();
-	//timeEnd->clear();
-}
-
 void Time::setId(int id) { this->id = id; }
 
 void Time::setTimeStart(string* timeStart) { this->timeStart = timeStart; }
@@ -47,4 +41,8 @@ istream& operator>>(istream& is, Time& time)
 	is >> *(time.timeEnd);
 
 	return is;
+}
+
+Time::~Time()
+{
 }

@@ -10,11 +10,6 @@ Auditory::Auditory(string* audit): id(-1), auditoryName(new string(*audit)) {}
 
 Auditory::Auditory(const Auditory &audit): id(audit.id), auditoryName(new string(*(audit.auditoryName))) {}
 
-Auditory::~Auditory()
-{
-	//auditoryName->clear();
-}
-
 void Auditory::setId(int id) { this->id = id; }
 
 void Auditory::setAuditoryName(string* auditory) { this->auditoryName = auditory; }
@@ -42,3 +37,5 @@ istream& operator>>(istream& is, Auditory& auditory)
 
 	return is;
 }
+
+Auditory::~Auditory() {}

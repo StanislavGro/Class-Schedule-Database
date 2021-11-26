@@ -10,11 +10,6 @@ Group::Group(string* gr): id(-1), groupName(new string(*gr)) {}
 
 Group::Group(const Group& gr): id(gr.id), groupName(new string(*(gr.groupName))){}
 
-Group::~Group()
-{
-	//groupName->clear();
-}
-
 void Group::setId(int id) { this->id = id; }
 
 void Group::setGroupName(string* group) { this->groupName = group; }
@@ -39,4 +34,8 @@ istream& operator>>(istream& is, Group& group)
 	is >> *(group.groupName);
 
 	return is;
+}
+
+Group::~Group()
+{
 }

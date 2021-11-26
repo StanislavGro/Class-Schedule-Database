@@ -56,6 +56,8 @@ void DataMapper::fillAllVectors(scheduleData* scheduleDataVector)
         retcode = SQLBindCol(hstmt, 10, SQL_C_CHAR, group, 20, NULL);
         retcode = SQLBindCol(hstmt, 11, SQL_C_CHAR, auditory, 20, NULL);
 
+        
+
         for (int i = 1;; i++)
         {
             retcode = SQLFetch(hstmt);
@@ -63,14 +65,37 @@ void DataMapper::fillAllVectors(scheduleData* scheduleDataVector)
                 cout << "!- Ошибка!";
             if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 
+
+                string newTimeStar = "";
+                string newTimeEnd = "";
+
+                for (int i = 0, k = 0; i < 20; i++) {
+                    if (time_start[i] == '0' && i == 0) {
+                        continue;
+                    }
+                    if (time_start[i] == ':')
+                        k++;
+                    if (k == 2)
+                        break;
+                    newTimeStar.push_back(time_start[i]);
+                }
+
+                for (int i = 0, k = 0; i < 20; i++) {
+                    if (time_end[i] == ':')
+                        k++;
+                    if (k == 2)
+                        break;
+                    newTimeEnd.push_back(time_end[i]);
+                }
+
                 scheduleDataVector->insertSchedule( new schedule(
                                                         id, 
                                                         new int(week), 
                                                         new string(day), 
                                                         new Time(
                                                             id_time, 
-                                                            new string(time_start), 
-                                                            new string(time_end)), 
+                                                            new string(newTimeStar), 
+                                                            new string(newTimeEnd)), 
                                                         new Group(
                                                             id_group, 
                                                             new string(group)), 
@@ -84,8 +109,6 @@ void DataMapper::fillAllVectors(scheduleData* scheduleDataVector)
             }
         }
 
-        cout << endl;
-
     }
 
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
@@ -94,6 +117,7 @@ void DataMapper::fillAllVectors(scheduleData* scheduleDataVector)
 
 
 }
+
 
 void DataMapper::updateIdVectors(scheduleData* scheduleDataVector, schedule* sch)
 {
@@ -131,6 +155,7 @@ void DataMapper::updateIdVectors(scheduleData* scheduleDataVector, schedule* sch
         cout << "!- Произошла ошибка вставки в БД!" << endl;
 
 }
+
 
 int DataMapper::connectToDB()
 {
@@ -205,6 +230,7 @@ void DataMapper::creatingTables()
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
     retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
     retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
 
     retcode = SQLPrepare(hstmt,
         (SQLWCHAR*)L"create table if not exists schedule ("
@@ -584,9 +610,9 @@ bool DataMapper::editByDay(int* number, string* dayStr)
         "join day_table as d on d.id = sc.day "
         "join time_table as ti on ti.id = sc.time "
         "join groupp_table as gr on gr.id = sc.groupp "
-        "join auditory_table as au on au.id = sc.auditory "
+        "join auditory_table as au on au.id = sc.auditory ";
         //"order by (sc.week, d.day, ti.time_start, ti.time_end, au.auditory)";
-        "order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
+        //"order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
 
     //wcout << output << endl;
 
@@ -655,9 +681,9 @@ bool DataMapper::editByTime(int* number, string* timeStartStr, string* timeEndSt
         "join day_table as d on d.id = sc.day "
         "join time_table as ti on ti.id = sc.time "
         "join groupp_table as gr on gr.id = sc.groupp "
-        "join auditory_table as au on au.id = sc.auditory "
+        "join auditory_table as au on au.id = sc.auditory ";
         //"order by (sc.week, d.day, ti.time_start, ti.time_end, au.auditory)";
-        "order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
+        //"order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
 
     //wcout << output << endl;
 
@@ -724,9 +750,9 @@ bool DataMapper::editByGroup(int* number, string* groupStr)
         "join day_table as d on d.id = sc.day "
         "join time_table as ti on ti.id = sc.time "
         "join groupp_table as gr on gr.id = sc.groupp "
-        "join auditory_table as au on au.id = sc.auditory "
+        "join auditory_table as au on au.id = sc.auditory ";
         //"order by (sc.week, d.day, ti.time_start, ti.time_end, au.auditory)";
-        "order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
+        //"order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
 
     //wcout << output << endl;
 
@@ -803,9 +829,9 @@ bool DataMapper::editByAuditory(int* number, string* auditoryStr)
         "join day_table as d on d.id = sc.day "
         "join time_table as ti on ti.id = sc.time "
         "join groupp_table as gr on gr.id = sc.groupp "
-        "join auditory_table as au on au.id = sc.auditory "
+        "join auditory_table as au on au.id = sc.auditory ";
         //"order by (sc.week, d.day, ti.time_start, ti.time_end, au.auditory)";
-        "order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
+        //"order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
 
     //wcout << output << endl;
 
@@ -867,36 +893,36 @@ bool DataMapper::editByAuditory(int* number, string* auditoryStr)
 
 bool DataMapper::remove(int* number)
 {
-    //int id = 0;
-    //int id_group = 0;
-    //vector<int> idVector;
+    int id = 0;
+    int id_group = 0;
+    vector<int> idVector;
 
-    //wstring output = L"select sc.*, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
-    //    "from schedule as sc "
-    //    "join day_table as d on d.id = sc.day "
-    //    "join time_table as ti on ti.id = sc.time "
-    //    "join groupp_table as gr on gr.id = sc.groupp "
-    //    "join auditory_table as au on au.id = sc.auditory ";
-    //    //"order by (sc.week, d.day, ti.time_start, ti.time_end, au.auditory)";
-    //    //"order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
+    wstring output = L"select sc.*, d.day, ti.time_start, ti.time_end, gr.groupp, au.auditory "
+        "from schedule as sc "
+        "join day_table as d on d.id = sc.day "
+        "join time_table as ti on ti.id = sc.time "
+        "join groupp_table as gr on gr.id = sc.groupp "
+        "join auditory_table as au on au.id = sc.auditory ";
+        //"order by (sc.week, d.day, ti.time_start, ti.time_end, au.auditory)";
+        //"order by(sc.week, sc.day, ti.time_start, ti.time_end, au.auditory)";
 
     ////wcout << output << endl;
 
-    //retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);    
-    //retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
+    retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);    
+    retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id, sizeof(id), NULL);
 
-    //for (int i = 0; ; i++) {
-    //    retcode = SQLFetch(hstmt);
-    //    if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
-    //        cout << "!- Error" << endl;
-    //    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-    //        idVector.push_back(id);
-    //    else break;
-    //}
-    //
-    //retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
-    //retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
-    //retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+    for (int i = 0; ; i++) {
+        retcode = SQLFetch(hstmt);
+        if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+            cout << "!- Error" << endl;
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+            idVector.push_back(id);
+        else break;
+    }
+    
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
     //cout << "NUMBER = " << number << endl;
     //cout << "VECTOR = ";
@@ -905,7 +931,6 @@ bool DataMapper::remove(int* number)
     cout << endl;*/
 
     //cout << idVector[number - 1] << endl;
-    SQLINTEGER removeNumber = *number;
 
     /*retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
     retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select groupp from schedule where id = ?", SQL_NTS);
@@ -920,6 +945,7 @@ bool DataMapper::remove(int* number)
     retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
     cout << id_group << endl;*/
 
+    SQLINTEGER removeNumber = idVector[*number-1];
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
     retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"delete from schedule where id = ?", SQL_NTS);

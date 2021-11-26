@@ -20,14 +20,6 @@ schedule::schedule(const schedule& sc) :
 	id(sc.id), weekNumber(new int(*sc.weekNumber)), dayOfWeek(new string(*sc.dayOfWeek)), time(new Time(*sc.time)), group(new Group(*sc.group)), auditory(new Auditory(*sc.auditory)) {}
 
 
-schedule::~schedule()
-{
-	//dayOfWeek->clear();
-	/*if(*weekNumber>0)
-		delete[] weekNumber;*/
-}
-
-
 void schedule::setID(int ID) { this->id = ID; }
 
 
@@ -59,6 +51,11 @@ Group* schedule::getGroup() { return this->group; }
 
 
 Time* schedule::getTime() { return this->time; }
+
+
+schedule::~schedule()
+{
+}
 
 
 string* schedule::getDayOfWeek() { return this->dayOfWeek; }

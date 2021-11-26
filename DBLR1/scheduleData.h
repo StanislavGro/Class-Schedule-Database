@@ -41,8 +41,8 @@ public:
 	bool editAuditory(Auditory*, Auditory*);
 	bool editGroup(Group*, Group*);
 
-	void find(string);
-	void find(int, int);
+	void find(string*);
+	void find(int*, int*);
 
 	void showScheduleVector();
 	void showAuditoryVector();
