@@ -6,8 +6,6 @@
 #include <sqlext.h>
 #include <stdarg.h>
 #include "schedule.h"
-#include "scheduleData.h"
-
 
 using namespace::std;
 
@@ -22,25 +20,35 @@ private:
 
 public:
 
-    DataMapper(scheduleData*);
+    DataMapper();
     ~DataMapper();
 
     int connectToDB();
     int disconnectFromDB();
 
     void creatingTables();
-    void fillAllVectors(scheduleData*);
-    void updateIdVectors(scheduleData*, schedule*);
+    vector<schedule*> fillAllVectors();
+    vector<Auditory*> fillAllVectorsFromAuditory();
+    vector<Group*> fillAllVectorsFromGroup();
+
         
     void printAll();
+    void printAuditorySchedule();
+    void printGroupSchedule();
     
     bool insert(schedule*);
+    bool insertToAuditory(Auditory*);
+    bool insertToGroup(Group*);
     
     int findSchedId(schedule*);
     int findAuditId(Auditory*);
     int findGroupId(Group*);
 
     bool edit(int*, schedule*);
+    bool editAuditory(int*, Auditory*);
+    bool editAuditory(Auditory*, Auditory*);
+    bool editGroup(int*, Group*);
+    bool editGroup(Group*, Group*);
     bool editByDay(int*, string*);
     bool editByTime(int*, string*, string*);
     bool editByGroup(int*, string*);

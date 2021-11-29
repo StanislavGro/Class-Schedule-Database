@@ -10,21 +10,20 @@ class Auditory
 private:
 
 	int id;
-	string *auditoryName;
+	string auditoryName;
 
 public:
 
 	Auditory();
-	Auditory(string*);
-	Auditory(int, string*);
+	Auditory(string&);
+	Auditory(int, string&);
 	Auditory(const Auditory&);
-	~Auditory();
 
 	void setId(int);
-	void setAuditoryName(string*);
+	void setAuditoryName(string&);
 
 	int getId();
-	string* getAuditoryName();
+	string getAuditoryName();
 
 	friend bool operator==(const Auditory&, const Auditory&);
 

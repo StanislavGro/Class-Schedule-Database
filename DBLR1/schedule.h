@@ -11,8 +11,8 @@ class schedule {
 private:
 
 	int	id;				//номер записи
-	int	*weekNumber;	//номер недели
-	string *dayOfWeek;	//день недели
+	int	weekNumber;		//номер недели
+	string dayOfWeek;	//день недели
 	Time *time;			//время начала и окончания
 	Group *group;		//название группы
 	Auditory *auditory;	//номер аудитории
@@ -21,21 +21,20 @@ private:
 public:
 
 	schedule();
-	schedule(int, int*, string*, Time*, Group*, Auditory*);
-	schedule(int*, string*, Time*, Group*, Auditory*);
+	schedule(int, int&, string&, Time*, Group*, Auditory*);
+	schedule(int&, string&, Time*, Group*, Auditory*);
 	schedule(const schedule &);
-	~schedule();
 
 	void setID(int);
-	void setWeekNumber(int*);
-	void setDayOfWeek(string*);
+	void setWeekNumber(int&);
+	void setDayOfWeek(string&);
 	void setTime(Time*);
 	void setGroup(Group*);
 	void setAuditory(Auditory*);
 
 	int getID();
-	int* getWeekNumber();
-	string* getDayOfWeek();
+	int getWeekNumber();
+	string getDayOfWeek();
 	Time* getTime();
 	Group* getGroup();
 	Auditory* getAuditory();

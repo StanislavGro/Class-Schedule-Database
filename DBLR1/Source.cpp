@@ -7,6 +7,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
+#include "Auditory.h"
 #include "schedule.h"
 #include "DataMapper.h"
 #include "scheduleData.h"
@@ -25,34 +26,42 @@ void console() {
 	string mainStr = "***Расписание занятий!***";
 	CenterString(mainStr, 25u);
 	
-	cout << "   1. Добавить запись\n" << endl;
-	cout << "   2. Удалить запись по номеру" << endl;
-	cout << "   3. Удалить записи по группе" << endl;
-	cout << "   4. Удалить записи по аудитории\n" << endl;
-	cout << "   5. Редактировать запись по номеру" << endl;
-	cout << "   6. Редактировать день в записи по номеру" << endl;
-	cout << "   7. Редактировать время в записи по номеру" << endl;
-	cout << "   8. Редактировать группу в записи по номеру" << endl;
-	cout << "   9. Редактировать аудиторию в записи по номеру\n" << endl;
-	cout << "   10. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
-	cout << "   11. Поиск свободной аудитории на заданное число часов в указанную неделю\n" << endl;
-	cout << "   12. Просмотр таблицы" << endl;
-	cout << "   13. Очистка экрана" << endl;
-	cout << "   14. Завершение сесии\n\n";
+	cout << "   1. Добавить запись в таблицу расписания" << endl;
+	cout << "   2. Добавить запись в таблицу аудиторий" << endl;
+	cout << "   3. Добавить запись в таблицу групп\n" << endl;
 
+	cout << "   4. Удалить запись в таблице расписаний по номеру" << endl;
+	cout << "   5. Удалить записи в таблице групп по группе" << endl;
+	cout << "   6. Удалить записи в таблице аудиторий по аудитории\n" << endl;
+
+	cout << "   7. Редактировать всю запись по номеру" << endl;
+	cout << "   8. Редактировать день в таблице расписаний по номеру" << endl;
+	cout << "   9. Редактировать время в таблице расписаний по номеру" << endl;
+	cout << "   10. Редактировать группу в таблице расписаний по номеру" << endl;
+	cout << "   11. Редактировать аудиторию в таблице расписаний по номеру" << endl;
+	cout << "   12. Редактировать аудиторию в таблице аудиторий по номеру" << endl;
+	cout << "   13. Редактировать аудиторию в таблице аудиторий по названию" << endl;
+	cout << "   14. Редактировать группу в таблице групп по номеру" << endl;
+	cout << "   15. Редактировать группу в таблице групп по названию\n" << endl;
+
+	cout << "   16. Поиск свободной аудитории в заданные часы в течение всего семестра" << endl;
+	cout << "   17. Поиск свободной аудитории на заданное число часов в указанную неделю\n" << endl;
+
+	cout << "   18. Просмотр таблицы расписания" << endl;
+	cout << "   19. Просмотр таблицы аудиторий" << endl;
+	cout << "   20. Просмотр таблицы групп\n" << endl;
+
+	cout << "   21. Очистка экрана" << endl;
+	cout << "   22. Завершение сесии\n\n";
 }
 
 int main() {
-
-	//1 Понедельник 8:30 10:00 АВТ-815 3-2
-
 
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	system("color 0A");
 
 	scheduleData scheduleDataVector;
-    DataMapper dataMapper(&scheduleDataVector);
 
 	console();
 
@@ -75,9 +84,17 @@ int main() {
 			cin >> sch;
 			cout << "\n" << sch;
 
-			dataMapper.insert(&sch);
+			//1 Понедельник 8:30 10:00 АВТ-815 3-2
 
-			dataMapper.updateIdVectors(&scheduleDataVector, &sch);
+			if (scheduleDataVector.ScheduleVectorCheck(sch)) {
+				cout << "!- Вставка в ВЕКТОР прошла успешно!" << endl;
+				if (scheduleDataVector.insertSchedule(sch))
+					cout << "!- Вставка в БД прошла успешно!" << endl;
+				else
+					cout << "!- Ошибка вставки в БД" << endl;
+			}
+			else
+				cout << "!- Ошибка вставки в ВЕКТОР" << endl;
 			
 			system("pause");
 
@@ -89,76 +106,92 @@ int main() {
 		}
 		case 2: {
 
-			if (scheduleDataVector.getScheduleVector().size() != 0) {
+			Auditory auditory;
 
-				int deleteNumber, schedId = 0, auditId = 0, groupId = 0;
+			system("cls");
 
-				cout << ">> Введите порядковый номер записи в расписании: ";
-				cin >> deleteNumber;
+			cout << ">> Введите аудиторию: " << endl;
+			cout << ">> ";
+			cin >> auditory;
+			cout << "\n" << auditory;
 
-				if (deleteNumber <= scheduleDataVector.getScheduleVector().size()) {
+			//3-2
 
-					int* delNum = new int(scheduleDataVector.getScheduleVector()[deleteNumber - 1].getID());
+			scheduleDataVector.insertAuditoryAndDB(auditory);
 
-					if (dataMapper.remove(delNum))
-						if (scheduleDataVector.removeInSchedule(*delNum))
-							cout << "!- Удаление выполнено!" << endl;
-						else
-							cout << "!- Произошла ошибка!" << endl;
-					else
-						cout << "!- Произошла ошибка!" << endl;
-				}
-				else
-					cout << "!- Такого порядкового номера нет!" << endl;
-			}
+			system("pause");
+
+			system("cls");
+
+			console();
+
+			break;
+		}
+		case 3: {
+
+			Group group;
+
+			system("cls");
+
+			cout << ">> Введите группу: " << endl;
+			cout << ">> ";
+			cin >> group;
+			cout << "\n" << group;
+
+			//АБВГ
+
+			scheduleDataVector.insertGroupAndDB(group);
+
+			system("pause");
+
+			system("cls");
+
+			console();
+
+			break;
+		}
+		case 4: {
+
+			int deleteNumber;
+
+			cout << ">> Введите порядковый номер записи в расписании: ";
+			cin >> deleteNumber;
+
+			if (scheduleDataVector.removeInSchedule(deleteNumber))
+				cout << "!- Объект был удален" << endl;
 			else
-				cout << "!- Таблица пуста! Нельзя ничего удалить" << endl;
+				cout << "!- Ошибка! Объект не был удален" << endl;
 
 			break;
 
 		}
-		
-		case 3: {
+		case 5: {
 
 			string deleteGroupp;
 
 			cout << "   Введите группу: ";
 			cin >> deleteGroupp;
-			//scheduleDataVector.removeAllInGroup(new Group(&deleteGroupp));
 
-			if (dataMapper.removeByGroup(&deleteGroupp)) {
-				scheduleDataVector.removeAllInGroup(new Group(&deleteGroupp));
-				cout << "!- Удаление выполнено!" << endl;
-			}
-			else
-				cout << "!- Произошла ошибка!" << endl;
+			Group group(deleteGroupp);
+
+			scheduleDataVector.removeOneInGroup(group);
 
 			break;
-
 		}
-		
-		case 4: {
+		case 6: {
 
 			string deleteAuditory;
 
 			cout << ">> Введите аудиторию: ";
 			cin >> deleteAuditory;
 
-			scheduleDataVector.removeAllInAuditory(new Auditory(&deleteAuditory));
+			Auditory auditory(deleteAuditory);
 
-			if (dataMapper.removeByAuditory(&deleteAuditory)) {
-				scheduleDataVector.removeAllInAuditory(new Auditory(&deleteAuditory));
-				cout << "!- Удаление выполнено!" << endl;
-			}
-			else
-				cout << "!- Произошла ошибка!" << endl;
-
+			scheduleDataVector.removeOneInAuditory(auditory);
 
 			break;
-
 		}
-		
-		case 5: {
+		case 7: {
 
 			schedule sch;
 			int editNumber;
@@ -169,19 +202,17 @@ int main() {
 			cout << ">> Введите новые: неделю, день, время начала, время окончания, группу и аудиторию:" << endl;
 			cout << ">> ";
 			cin >> sch;
-			//scheduleDataVector.editAllSchedule(editNumber, &sch);
 
-			if (dataMapper.edit(&editNumber, &sch)) {
-				scheduleDataVector.editAllSchedule(editNumber, &sch);
-				cout << "!- Запись изменена!" << endl;
-			}
+			//1 Понедельник 8:30 10:00 АВТ-815 3-2
+
+			if (scheduleDataVector.editAllSchedule(editNumber, sch))
+				cout << "!- " << editNumber << " элемент был изменен" << endl;
 			else
-				cout << "!- Произошла ошибка!" << endl;
+				cout << "!- Ошибка изменения " << editNumber << " элемента" << endl;
 
 			break;
 		}
-			  
-		case 6: {
+		case 8: {
 
 			string dayStr;
 			int editNumber;
@@ -192,18 +223,18 @@ int main() {
 			cout << ">> Введите новый день недели: ";
 			cin >> dayStr;
 
-
-			if (dataMapper.editByDay(&editNumber, &dayStr)) {
-				scheduleDataVector.editByAuditoryInSchedule(editNumber, new Auditory(&dayStr));
-				cout << "!- Запись изменена!" << endl;
+			if (dayStr == "Понедельник" || dayStr == "Вторник" || dayStr == "Среда" || dayStr == "Четверг" || dayStr == "Пятница" || dayStr == "Суббота") {
+				if (scheduleDataVector.editByDayInSchedule(editNumber, dayStr))
+					cout << "!- " << editNumber << " элемент был изменен" << endl;
+				else
+					cout << "!- Ошибка изменения " << editNumber << " элемента" << endl;
 			}
 			else
-				cout << "!- Произошла ошибка!" << endl;
+				cout << "!- Введенного дня не существует! " << endl;
 
 			break;
 		}
-			  
-		case 7: {
+		case 9: {
 
 			string timeStartStr, timeEndStr;
 			int editNumber;
@@ -216,20 +247,27 @@ int main() {
 			cout << ">> Введите время окончания: ";
 			cin >> timeEndStr;
 
-
-			if (dataMapper.editByTime(&editNumber, &timeStartStr, &timeEndStr)) {
-				scheduleDataVector.editByTimeInSchedule(editNumber, new Time(&timeStartStr, &timeEndStr));
-				cout << "!- Запись изменена!" << endl;
+			if ((timeStartStr == "8:30" && timeEndStr == "10:00") ||
+				(timeStartStr == "10:15" && timeEndStr == "11:45") ||
+				(timeStartStr == "12:00" && timeEndStr == "13:30") ||
+				(timeStartStr == "14:00" && timeEndStr == "15:30") ||
+				(timeStartStr == "15:45" && timeEndStr == "17:15") ||
+				(timeStartStr == "17:30" && timeEndStr == "19:00") ||
+				(timeStartStr == "19:15" && timeEndStr == "20:45")) {
+				if (scheduleDataVector.editByTimeInSchedule(editNumber, *(new Time(timeStartStr, timeEndStr))))
+					cout << "!- " << editNumber << " элемент был изменен" << endl;
+				else
+					cout << "!- Ошибка изменения " << editNumber << " элемента" << endl;
 			}
 			else
-				cout << "!- Произошла ошибка!" << endl;
+				cout << "!- Ошибка! Введены неправильные промежутки " << endl;
 
 			break;
 		}
-		case 8: {
+		case 10: {
 
 			string groupStr;
-			int editNumber, groupID;
+			int editNumber;
 
 			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
@@ -237,30 +275,18 @@ int main() {
 			cout << ">> Введите новую группу: ";
 			cin >> groupStr;
 
-			Group *newGroup = new Group(&groupStr);
-
-			if (dataMapper.editByGroup(&editNumber, &groupStr)) {
-
-				groupID = dataMapper.findGroupId(newGroup);
-				if (groupID > 0) {
-					newGroup->setId(groupID);
-					//scheduleDataVector.getGroupVector()[-1].setId(groupID);
-					scheduleDataVector.editByGroupInSchedule(editNumber, newGroup);
-					scheduleDataVector.insertGroup(newGroup);
-				}
-
-				cout << "!- Запись изменена!" << endl;
-			}
+			if (scheduleDataVector.editByGroupInSchedule(editNumber, *(new Group(groupStr))))
+				cout << "!- " << editNumber << " элемент был изменен" << endl;
 			else
-				cout << "!- Произошла ошибка!" << endl;
-		
+				cout << "!- Ошибка изменения " << editNumber << " элемента" << endl;
 
 			break;
+
 		}
-		case 9: {
+		case 11: {
 
 			string auditoryStr;
-			int editNumber, auditoryID;
+			int editNumber;
 
 			cout << ">> Введите порядковый номер записи в расписании: ";
 			cin >> editNumber;
@@ -268,25 +294,101 @@ int main() {
 			cout << ">> Введите новую аудиторию: ";
 			cin >> auditoryStr;
 
-			Auditory* newAuditory = new Auditory(&auditoryStr);
-
-			if (dataMapper.editByAuditory(&editNumber, &auditoryStr)) {
-
-				auditoryID = dataMapper.findAuditId(newAuditory);
-				if (auditoryID > 0) {
-					newAuditory->setId(auditoryID);
-					scheduleDataVector.editByAuditoryInSchedule(editNumber, newAuditory);
-					scheduleDataVector.insertAuditory(newAuditory);
-				}
-
-				cout << "!- Запись изменена!" << endl;
-			}
+			if (scheduleDataVector.editByAuditoryInSchedule(editNumber, *(new Auditory(auditoryStr))))
+				cout << "!- " << editNumber << " элемент был изменен" << endl;
 			else
-				cout << "!- Произошла ошибка!" << endl;
+				cout << "!- Ошибка изменения " << editNumber << " элемента" << endl;
+
 
 			break;
 		}
-		case 10: {
+		case 12: {
+
+			Auditory auditory;
+			int editNumber;
+
+			cout << ">> Введите порядковый номер записи в таблице аудиторий: ";
+			cin >> editNumber;
+
+			cout << ">> Введите новую аудиторию: " << endl;
+			cout << ">> ";
+			cin >> auditory;
+
+			//3-2
+
+			if (scheduleDataVector.editAuditory(editNumber, auditory))
+				cout << "!- " << editNumber << " элемент был изменен" << endl;
+			else
+				cout << "!- Ошибка изменения " << editNumber << " элемента" << endl;
+
+			break;
+		}
+		case 13: {
+
+			Auditory oldAuditory;
+			Auditory newAuditory;
+
+			cout << ">> Введите текущую аудиторию: " << endl;
+			cout << ">> ";
+			cin >> oldAuditory;
+
+			cout << ">> Введите новую аудиторию: " << endl;
+			cout << ">> ";
+			cin >> newAuditory;
+
+			//3-2
+
+			if (scheduleDataVector.editAuditory(oldAuditory, newAuditory))
+				cout << "!- " << oldAuditory << " элемент был изменен" << endl;
+			else
+				cout << "!- Ошибка изменения " << oldAuditory << " элемента" << endl;
+
+			break;
+		}
+		case 14: {
+
+			Group group;
+			int editNumber;
+
+			cout << ">> Введите порядковый номер записи в таблице групп: ";
+			cin >> editNumber;
+
+			cout << ">> Введите новую группу: " << endl;
+			cout << ">> ";
+			cin >> group;
+
+			//АВТ-815
+
+			if (scheduleDataVector.editGroup(editNumber, group))
+				cout << "!- " << editNumber << " элемент был изменен" << endl;
+			else
+				cout << "!- Ошибка изменения " << editNumber << " элемента" << endl;
+
+			break;
+		}
+		case 15: {
+
+			Group oldGroup;
+			Group newGroup;
+
+			cout << ">> Введите текущую группу: " << endl;
+			cout << ">> ";
+			cin >> oldGroup;
+
+			cout << ">> Введите новую группу: " << endl;
+			cout << ">> ";
+			cin >> newGroup;
+
+			//АВТ-815
+
+			if (scheduleDataVector.editGroup(oldGroup, newGroup))
+				cout << "!- " << oldGroup << " элемент был изменен" << endl;
+			else
+				cout << "!- Ошибка изменения " << oldGroup << " элемента" << endl;
+
+			break;
+		}
+		case 16: {
 
 			string hours;
 			int audit;
@@ -296,13 +398,11 @@ int main() {
 			cin.get();
 			getline(cin, hours);
 
-			//dataMapper.find(hours);
-			scheduleDataVector.find(&hours);
+			scheduleDataVector.find(hours);
 
 			break;
-
 		}
-		case 11: {
+		case 17: {
 
 			int numberWeek, numberHours;
 
@@ -312,19 +412,23 @@ int main() {
 			cout << ">> Введите номер недели: ";
 			cin >> numberWeek;
 
-			//dataMapper.find(numberHours, numberWeek);
-			scheduleDataVector.find(&numberHours,&numberWeek);
-
+			scheduleDataVector.find(numberHours, numberWeek);
 
 			break;
 		}
-		case 12: {
-
-			dataMapper.printAll();
-
+		case 18: {
+			scheduleDataVector.printDBShedule();
 			break;
 		}
-		case 13: {
+		case 19: {
+			scheduleDataVector.printDBAuditory();
+			break;
+		}
+		case 20: {
+			scheduleDataVector.printDBGroup();
+			break;
+		}
+		case 21: {
 
 			system("cls");
 
@@ -332,8 +436,9 @@ int main() {
 
 			break;
 		}
-		case 14: {
+		case 22: {
 			s = 0;
+
 			break;
 		}
 		default: {

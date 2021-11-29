@@ -1,16 +1,15 @@
-#include "DataMapper.h"
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include"DataMapper.h"
 
 using namespace::std;
 
-DataMapper::DataMapper(scheduleData* scheduleDataVector) 
+DataMapper::DataMapper() 
 { 
 
     if (connectToDB() == 1) {
         creatingTables();
-        fillAllVectors(scheduleDataVector);
     }
     else
         cout << "!- Неизвестная ошибка!" << endl;
@@ -18,8 +17,10 @@ DataMapper::DataMapper(scheduleData* scheduleDataVector)
 } 
 
 
-void DataMapper::fillAllVectors(scheduleData* scheduleDataVector)
+vector<schedule*> DataMapper::fillAllVectors()
 {
+
+    vector<schedule*> scheduleDataVector;
 
     int id = 0;
     int id_time = 0;
@@ -66,8 +67,7 @@ void DataMapper::fillAllVectors(scheduleData* scheduleDataVector)
             if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 
 
-                string newTimeStar = "";
-                string newTimeEnd = "";
+                string newTimeStar = "", newTimeEnd = "";
 
                 for (int i = 0, k = 0; i < 20; i++) {
                     if (time_start[i] == '0' && i == 0) {
@@ -88,20 +88,11 @@ void DataMapper::fillAllVectors(scheduleData* scheduleDataVector)
                     newTimeEnd.push_back(time_end[i]);
                 }
 
-                scheduleDataVector->insertSchedule( new schedule(
-                                                        id, 
-                                                        new int(week), 
-                                                        new string(day), 
-                                                        new Time(
-                                                            id_time, 
-                                                            new string(newTimeStar), 
-                                                            new string(newTimeEnd)), 
-                                                        new Group(
-                                                            id_group, 
-                                                            new string(group)), 
-                                                        new Auditory(
-                                                            id_auditory, 
-                                                            new string(auditory))));
+                string newGroup = string(group);
+                string newAuditory = string(auditory);
+                string newDay = string(day);
+
+                scheduleDataVector.push_back(new schedule(id, week, newDay, new Time(newTimeStar, newTimeEnd), new Group(id_group, newGroup), new Auditory(id_auditory, newAuditory)));
 
             }
             else {
@@ -115,44 +106,99 @@ void DataMapper::fillAllVectors(scheduleData* scheduleDataVector)
     retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
     retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
+    return scheduleDataVector;
 
 }
 
-
-void DataMapper::updateIdVectors(scheduleData* scheduleDataVector, schedule* sch)
+vector<Auditory*> DataMapper::fillAllVectorsFromAuditory()
 {
 
-    int schedId = 0, auditId = 0, groupId = 0;
+    vector<Auditory*> AuditoryDataVector;
 
-    schedId = this->findSchedId(sch);
-    auditId = this->findAuditId(sch->getAuditory());
-    groupId = this->findGroupId(sch->getGroup());
+    int id_auditory = 0;
+    char auditory[20] = "";
 
-    if (schedId > 0 && auditId > 0 && groupId > 0) {
-        cout << "!- Вставка в БД выполнена успешно!" << endl;
-        sch->setID(schedId);
-        if (scheduleDataVector->insertSchedule(new schedule(*sch))) {
-            cout << "!- Вставка в ОП выполнена успешно!" << endl;
-            for (int i = 0; i < scheduleDataVector->getAuditoryVector().size(); i++)
-                if ((scheduleDataVector->getAuditoryVector())[i] == *(sch->getAuditory())) {
-                    scheduleDataVector->removeOneInAuditory(sch->getAuditory());
-                    break;
-                }
-            scheduleDataVector->insertAuditory(new Auditory(auditId, sch->getAuditory()->getAuditoryName()));
+    wstring output = L"select * from auditory_table";
 
-            for (int i = 0; i < scheduleDataVector->getGroupVector().size(); i++)
-                if ((scheduleDataVector->getGroupVector())[i] == *(sch->getGroup())) {
-                    scheduleDataVector->removeOneInGroup(sch->getGroup());
-                    break;
-                }
-            scheduleDataVector->insertGroup((new Group(groupId, sch->getGroup()->getGroupName())));
+    retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
 
+
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_auditory, sizeof(id_auditory), NULL);
+        retcode = SQLBindCol(hstmt, 2, SQL_C_CHAR, auditory, 20, NULL);
+
+        for (int i = 1;; i++)
+        {
+            retcode = SQLFetch(hstmt);
+            if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+                cout << "!- Ошибка!";
+            if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+                string newAuditory = string(auditory);
+
+                AuditoryDataVector.push_back(new Auditory(id_auditory, newAuditory));
+
+            }
+            else {
+                break;
+            }
         }
-        else
-            cout << "!- Ошибка вставки в ОП!" << endl;
+
     }
-    else
-        cout << "!- Произошла ошибка вставки в БД!" << endl;
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return AuditoryDataVector;
+}
+
+vector<Group*> DataMapper::fillAllVectorsFromGroup()
+{
+
+    vector<Group*> GroupDataVector;
+
+    int id_group = 0;
+    char group[20] = "";
+
+    wstring output = L"select * from groupp_table";
+
+    //wcout << output << endl;
+    retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
+
+
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+        retcode = SQLBindCol(hstmt, 1, SQL_C_SLONG, &id_group, sizeof(id_group), NULL);
+        retcode = SQLBindCol(hstmt, 2, SQL_C_CHAR, group, 20, NULL);
+
+        for (int i = 1;; i++)
+        {
+            retcode = SQLFetch(hstmt);
+            if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+                cout << "!- Ошибка!";
+            if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+                string newGroup = string(group);
+
+                GroupDataVector.push_back(new Group(id_group, newGroup));
+
+            }
+            else {
+                break;
+            }
+        }
+
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return GroupDataVector;
+
+
 
 }
 
@@ -325,18 +371,18 @@ bool DataMapper::insert(schedule* sched)
     int id_time = 0;
 
    
-    SQLINTEGER week = *(sched->getWeekNumber());
+    SQLINTEGER week = sched->getWeekNumber();
     SQLWCHAR day[20];
     SQLWCHAR timeStart[20];
     SQLWCHAR timeEnd[20];
     SQLWCHAR group[20];
     SQLWCHAR auditory[20];
 
-    strcpy_s((char*)group, strlen(sched->getGroup()->getGroupName()->c_str()) + 1, sched->getGroup()->getGroupName()->c_str());
-    strcpy_s((char*)timeStart, strlen(sched->getTime()->getTimeStart()->c_str()) + 1, sched->getTime()->getTimeStart()->c_str());
-    strcpy_s((char*)timeEnd, strlen(sched->getTime()->getTimeEnd()->c_str()) + 1, sched->getTime()->getTimeEnd()->c_str());
-    strcpy_s((char*)day, strlen(sched->getDayOfWeek()->c_str()) + 1, sched->getDayOfWeek()->c_str());
-    strcpy_s((char*)auditory, strlen(sched->getAuditory()->getAuditoryName()->c_str()) + 1, sched->getAuditory()->getAuditoryName()->c_str());
+    strcpy_s((char*)group, strlen(sched->getGroup()->getGroupName().c_str()) + 1, sched->getGroup()->getGroupName().c_str());
+    strcpy_s((char*)timeStart, strlen(sched->getTime()->getTimeStart().c_str()) + 1, sched->getTime()->getTimeStart().c_str());
+    strcpy_s((char*)timeEnd, strlen(sched->getTime()->getTimeEnd().c_str()) + 1, sched->getTime()->getTimeEnd().c_str());
+    strcpy_s((char*)day, strlen(sched->getDayOfWeek().c_str()) + 1, sched->getDayOfWeek().c_str());
+    strcpy_s((char*)auditory, strlen(sched->getAuditory()->getAuditoryName().c_str()) + 1, sched->getAuditory()->getAuditoryName().c_str());
 
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
@@ -424,6 +470,44 @@ bool DataMapper::insert(schedule* sched)
     return true;
 }
 
+bool DataMapper::insertToAuditory(Auditory* audit)
+{
+    int id_auditory = 0;
+    SQLWCHAR auditory[20];
+
+    strcpy_s((char*)auditory, strlen(audit->getAuditoryName().c_str()) + 1, audit->getAuditoryName().c_str());
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO auditory_table(auditory)"
+        " VALUES (?)", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return true;
+}
+
+bool DataMapper::insertToGroup(Group* gr)
+{
+    int id_group = 0;
+    SQLWCHAR group[20];
+
+    strcpy_s((char*)group, strlen(gr->getGroupName().c_str()) + 1, gr->getGroupName().c_str());
+
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO groupp_table(groupp)"
+        "VALUES (?)", SQL_NTS);
+    retcode = SQLExecute(hstmt);
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    
+    return true;
+}
+
 
 int DataMapper::findSchedId(schedule* sched)
 {
@@ -435,18 +519,18 @@ int DataMapper::findSchedId(schedule* sched)
     int id = 0;
     int id_time = 0;
 
-    SQLINTEGER week = *(sched->getWeekNumber());
+    SQLINTEGER week = sched->getWeekNumber();
     SQLWCHAR day[20];
     SQLWCHAR timeStart[20];
     SQLWCHAR timeEnd[20];
     SQLWCHAR group[20];
     SQLWCHAR auditory[20];
 
-    strcpy_s((char*)group, strlen(sched->getGroup()->getGroupName()->c_str()) + 1, sched->getGroup()->getGroupName()->c_str());
-    strcpy_s((char*)timeStart, strlen(sched->getTime()->getTimeStart()->c_str()) + 1, sched->getTime()->getTimeStart()->c_str());
-    strcpy_s((char*)timeEnd, strlen(sched->getTime()->getTimeEnd()->c_str()) + 1, sched->getTime()->getTimeEnd()->c_str());
-    strcpy_s((char*)day, strlen(sched->getDayOfWeek()->c_str()) + 1, sched->getDayOfWeek()->c_str());
-    strcpy_s((char*)auditory, strlen(sched->getAuditory()->getAuditoryName()->c_str()) + 1, sched->getAuditory()->getAuditoryName()->c_str());
+    strcpy_s((char*)group, strlen(sched->getGroup()->getGroupName().c_str()) + 1, sched->getGroup()->getGroupName().c_str());
+    strcpy_s((char*)timeStart, strlen(sched->getTime()->getTimeStart().c_str()) + 1, sched->getTime()->getTimeStart().c_str());
+    strcpy_s((char*)timeEnd, strlen(sched->getTime()->getTimeEnd().c_str()) + 1, sched->getTime()->getTimeEnd().c_str());
+    strcpy_s((char*)day, strlen(sched->getDayOfWeek().c_str()) + 1, sched->getDayOfWeek().c_str());
+    strcpy_s((char*)auditory, strlen(sched->getAuditory()->getAuditoryName().c_str()) + 1, sched->getAuditory()->getAuditoryName().c_str());
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, timeStart, 255, NULL);
     retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, timeEnd, 255, NULL);
@@ -516,7 +600,7 @@ int DataMapper::findAuditId(Auditory* audit)
     int id = 0;
     SQLWCHAR auditory[20];
 
-    strcpy_s((char*)auditory, strlen(audit->getAuditoryName()->c_str()) + 1, audit->getAuditoryName()->c_str());
+    strcpy_s((char*)auditory, strlen(audit->getAuditoryName().c_str()) + 1, audit->getAuditoryName().c_str());
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
     retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"select id from auditory_table where auditory = ?", SQL_NTS);
@@ -556,7 +640,7 @@ int DataMapper::findGroupId(Group* Group)
     int id = 0;
     SQLWCHAR group[20];
 
-    strcpy_s((char*)group, strlen(Group->getGroupName()->c_str()) + 1, Group->getGroupName()->c_str());
+    strcpy_s((char*)group, strlen(Group->getGroupName().c_str()) + 1, Group->getGroupName().c_str());
     
 
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
@@ -591,6 +675,96 @@ bool DataMapper::edit(int* number, schedule* sched)
 {
     remove(number);
     insert(sched);
+
+    return true;
+}
+
+bool DataMapper::editAuditory(int* index, Auditory* audit)
+{
+    int id_auditory = 0;
+    SQLWCHAR auditory[20];
+    strcpy_s((char*)auditory, strlen(audit->getAuditoryName().c_str()) + 1, audit->getAuditoryName().c_str());
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    SQLINTEGER removeNumber = audit->getId();
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, auditory, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"update auditory_table set auditory = ? where id = ?", SQL_NTS);
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return true;
+}
+
+bool DataMapper::editAuditory(Auditory* oldAuditory, Auditory* newAuditory)
+{
+    SQLWCHAR oldA[20];
+    SQLWCHAR newA[20];
+    strcpy_s((char*)oldA, strlen(oldAuditory->getAuditoryName().c_str()) + 1, oldAuditory->getAuditoryName().c_str());
+    strcpy_s((char*)newA, strlen(newAuditory->getAuditoryName().c_str()) + 1, newAuditory->getAuditoryName().c_str());
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, newA, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, oldA, 255, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"update auditory_table set auditory = ? where auditory = ?", SQL_NTS);
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return true;
+}
+
+bool DataMapper::editGroup(int* index, Group* gr)
+{
+    int id_auditory = 0;
+    SQLWCHAR group[20];
+    strcpy_s((char*)group, strlen(gr->getGroupName().c_str()) + 1, gr->getGroupName().c_str());
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    SQLINTEGER removeNumber = gr->getId();
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, group, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &removeNumber, 0, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"update groupp_table set groupp = ? where id = ?", SQL_NTS);
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    return true;
+}
+
+bool DataMapper::editGroup(Group* oldGroup, Group* newGroup)
+{
+    SQLWCHAR oldG[20];
+    SQLWCHAR newG[20];
+    strcpy_s((char*)oldG, strlen(oldGroup->getGroupName().c_str()) + 1, oldGroup->getGroupName().c_str());
+    strcpy_s((char*)newG, strlen(newGroup->getGroupName().c_str()) + 1, newGroup->getGroupName().c_str());
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, newG, 255, NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 255, 0, oldG, 255, NULL);
+    retcode = SQLExecDirect(hstmt, (SQLWCHAR*)L"update groupp_table set groupp = ? where groupp = ?", SQL_NTS);
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
 
     return true;
 }
@@ -1505,6 +1679,110 @@ void DataMapper::printAll()
     retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
     retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
     retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+}
+
+void DataMapper::printAuditorySchedule()
+{
+    bool isEmpty = true;
+
+    int id_auditory = 0;
+    char auditory[20] = "";
+
+    wstring output = L"select auditory from auditory_table";
+    retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
+
+
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+        retcode = SQLBindCol(hstmt, 1, SQL_C_CHAR, auditory, 20, NULL);
+
+        for (int i = 1;; i++)
+        {
+            retcode = SQLFetch(hstmt);
+            if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+                cout << "!- Ошибка!";
+            if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+                isEmpty = false;
+
+                cout << endl;
+
+                cout << "    " << i << "." << " Аудитория: ";
+                for (int k = 0; auditory[k] != '\0'; k++)
+                    cout << auditory[k];
+
+            }
+            else {
+                if (isEmpty) {
+                    cout << "\n!- Таблица пуста!\n";
+                }
+                break;
+            }
+        }
+
+        cout << endl;
+        cout << endl;
+
+
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+
+}
+
+void DataMapper::printGroupSchedule()
+{
+
+    bool isEmpty = true;
+
+    int id_groupp = 0;
+    char group[20] = "";
+
+    wstring output = L"select groupp from groupp_table";
+
+    retcode = SQLExecDirect(hstmt, const_cast<SQLWCHAR*>(output.c_str()), SQL_NTS);
+
+
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        retcode = SQLBindCol(hstmt, 1, SQL_C_CHAR, group, 20, NULL);
+
+        for (int i = 1;; i++)
+        {
+            retcode = SQLFetch(hstmt);
+            if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO)
+                cout << "!- Ошибка!";
+            if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
+                isEmpty = false;
+
+                cout << endl;
+
+                cout << "    " << i << "." << "Группа: ";
+                for (int k = 0; group[k] != '\0'; k++)
+                    cout << group[k];
+
+            }
+            else {
+                if (isEmpty) {
+                    cout << "\n!- Таблица пуста!\n";
+                }
+                break;
+            }
+        }
+
+        cout << endl;
+        cout << endl;
+
+    }
+
+    retcode = SQLFreeStmt(hstmt, SQL_CLOSE);
+    retcode = SQLFreeStmt(hstmt, SQL_UNBIND);
+    retcode = SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+
+
 }
 
 

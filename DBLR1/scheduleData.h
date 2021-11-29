@@ -5,52 +5,76 @@
 #include"schedule.h"
 #include"Auditory.h"
 #include"Group.h"
-#include"Time.h"
+#include"DataMapper.h"
+
+
+using namespace::std;
 
 class scheduleData
 {
 private:
 
-	vector<schedule> scheduleVector;
-	vector<Auditory> auditoryVector;
-	vector<Group> groupVector;
+	DataMapper dMapper;
+
+	vector<schedule*> scheduleVector;
+	vector<Auditory*> auditoryVector;
+	vector<Group*> groupVector;
 
 public:
 
 	~scheduleData();
 
-	bool insertSchedule(schedule*);
-	bool insertAuditory(Auditory*);
-	bool insertGroup(Group*);
+	void fillAllTablesFromDB();
+
+	bool insertSchedule(schedule&);
+	bool insertAuditory(Auditory&);
+	bool insertAuditoryAndDB(Auditory&);
+	bool insertGroup(Group&);
+	bool insertGroupAndDB(Group&);
 	
-	bool isScheduleExist(schedule*);
-	bool isAuditoryExist(Auditory*);
-	bool isGroupExist(Group*);
+	bool isScheduleExist(schedule&);
+	bool isAuditoryExist(Auditory&);
+	bool isGroupExist(Group&);
 
-	bool removeInSchedule(int);
-	bool removeOneInAuditory(Auditory*);
-	bool removeOneInGroup(Group*);
-	bool removeAllInGroup(Group*);
-	bool removeAllInAuditory(Auditory*);
+	int findIdInAuditVector(Auditory&);
+	int findIdInGroupVector(Group&);
+	int findIdInScheduleVector(schedule&);
+	
+	bool removeInSchedule(int&);
+	bool removeOneInAuditory(Auditory&);
+	bool removeOneInGroup(Group&);
+	//bool removeAllInAuditory(Auditory&);
+	//bool removeAllInGroup(Group&);
 
-	bool editAllSchedule(int, schedule*);
-	bool editByDayInSchedule(int, string*);
-	bool editByTimeInSchedule(int, Time*);
-	bool editByGroupInSchedule(int, Group*);
-	bool editByAuditoryInSchedule(int, Auditory*);
-	bool editAuditory(Auditory*, Auditory*);
-	bool editGroup(Group*, Group*);
+	bool freeSchedule();
+	void updateIdVectors(schedule*);
 
-	void find(string*);
-	void find(int*, int*);
+	bool ScheduleVectorCheck(schedule &);
+
+	bool editAllSchedule(int&, schedule&);
+	bool editByDayInSchedule(int&, string&);
+	bool editByTimeInSchedule(int&, Time&);
+	bool editByGroupInSchedule(int&, Group&);
+	bool editByAuditoryInSchedule(int&, Auditory&);
+	bool editAuditory(int&, Auditory&);
+	bool editAuditory(Auditory&, Auditory&);
+	bool editGroup(int&, Group&);
+	bool editGroup(Group&, Group&);
+	
+	void find(const string&);
+	void find(const int&, const int&);
 
 	void showScheduleVector();
 	void showAuditoryVector();
 	void showGroupVector();
 
-	vector<schedule> getScheduleVector();
-	vector<Auditory> getAuditoryVector();
-	vector<Group> getGroupVector();
+	void printDBShedule();
+	void printDBAuditory();
+	void printDBGroup();
+
+	vector<schedule*> getScheduleVector();
+	vector<Auditory*> getAuditoryVector();
+	vector<Group*> getGroupVector();
 
 };
 
