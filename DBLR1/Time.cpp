@@ -22,8 +22,8 @@ bool operator==(const Time& time1, const Time& time2)
 
 ostream& operator<<(ostream& os, Time& time)
 {
-	os << "    Время начала: " << time.timeStart << endl;
-	os << "    Время окончания: " << time.timeEnd << endl;
+	os << "   Время начала: " << time.timeStart << endl;
+	os << "   Время окончания: " << time.timeEnd << endl;
 
 	return os;
 }

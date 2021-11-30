@@ -25,7 +25,7 @@ bool operator==(const Group& gr1, const Group& gr2)
 
 ostream& operator<<(ostream& os, Group& group)
 {
-	os << "    Название группы: " << group.groupName << endl;
+	os << "   Название группы: " << group.groupName << endl;
 	return os;
 }
 

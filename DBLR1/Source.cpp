@@ -96,6 +96,8 @@ int main() {
 			else
 				cout << "!- Ошибка вставки в ВЕКТОР" << endl;
 			
+			cout << endl;
+
 			system("pause");
 
 			system("cls");
@@ -339,9 +341,9 @@ int main() {
 			//3-2
 
 			if (scheduleDataVector.editAuditory(oldAuditory, newAuditory))
-				cout << "!- " << oldAuditory << " элемент был изменен" << endl;
+				cout << "!- " << oldAuditory.getAuditoryName() << " элемент был изменен" << endl;
 			else
-				cout << "!- Ошибка изменения " << oldAuditory << " элемента" << endl;
+				cout << "!- Ошибка изменения " << oldAuditory.getAuditoryName() << " элемента" << endl;
 
 			break;
 		}
@@ -382,9 +384,9 @@ int main() {
 			//АВТ-815
 
 			if (scheduleDataVector.editGroup(oldGroup, newGroup))
-				cout << "!- " << oldGroup << " элемент был изменен" << endl;
+				cout << "!- " << oldGroup.getGroupName() << " элемент был изменен" << endl;
 			else
-				cout << "!- Ошибка изменения " << oldGroup << " элемента" << endl;
+				cout << "!- Ошибка изменения " << oldGroup.getGroupName() << " элемента" << endl;
 
 			break;
 		}

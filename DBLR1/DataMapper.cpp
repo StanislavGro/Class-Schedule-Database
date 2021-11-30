@@ -1661,17 +1661,17 @@ void DataMapper::printAll()
                 cout << "    Номер аудитории: ";
                 for (int k = 0; auditory[k] != '\0'; k++)
                     cout << auditory[k];
-                cout << endl;
-
             }
             else {
                 if (isEmpty) {
-                    cout << "\n!- Таблица пуста!\n";
+                    cout << "\n!- Таблица РАСПИСАНИЯ пуста!";
                 }
                 break;
             }
+
         }
 
+        cout << endl;
         cout << endl;
 
     }
@@ -1707,14 +1707,14 @@ void DataMapper::printAuditorySchedule()
 
                 cout << endl;
 
-                cout << "    " << i << "." << " Аудитория: ";
+                cout << "    " << i << " -> " << " Аудитория: ";
                 for (int k = 0; auditory[k] != '\0'; k++)
                     cout << auditory[k];
 
             }
             else {
                 if (isEmpty) {
-                    cout << "\n!- Таблица пуста!\n";
+                    cout << "\n!- Таблица АУДИТОРИЙ пуста!";
                 }
                 break;
             }
@@ -1722,7 +1722,6 @@ void DataMapper::printAuditorySchedule()
 
         cout << endl;
         cout << endl;
-
 
     }
 
@@ -1760,14 +1759,14 @@ void DataMapper::printGroupSchedule()
 
                 cout << endl;
 
-                cout << "    " << i << "." << "Группа: ";
+                cout << "    " << i << " -> " << "Группа: ";
                 for (int k = 0; group[k] != '\0'; k++)
                     cout << group[k];
 
             }
             else {
                 if (isEmpty) {
-                    cout << "\n!- Таблица пуста!\n";
+                    cout << "\n!- Таблица ГРУПП пуста!";
                 }
                 break;
             }

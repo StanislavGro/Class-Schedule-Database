@@ -25,7 +25,7 @@ bool operator==(const Auditory& au1, const Auditory& au2)
 
 ostream& operator<<(ostream& os, Auditory& auditory)
 {
-	os << "    Номер аудитории: " << auditory.auditoryName << endl;
+	os << "   Номер аудитории: " << auditory.auditoryName << endl;
 
 	return os;
 }
